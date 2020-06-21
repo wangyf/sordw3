@@ -2,4 +2,4 @@
 Support Operator Rupture Dynamics
 
 Requirments:
-[] Python3
+--Python3
