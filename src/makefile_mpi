@@ -1,0 +1,121 @@
+# Compiler and Flags
+FC = mpif90 
+FLAGS = -O3 -fimplicit-none -Wall -cpp -fdefault-real-8 -Ddoubleprecision
+
+OBJS = surfnormals.o util.o frio.o bc.o globals.o diffcn.o diffnc.o \
+       hourglass.o mpi.o arrays.o setup.o stats.o source.o checkpoint.o \
+       fieldio.o parameters.o resample.o material.o inivolstress.o thermpres.o rupture.o  \
+       timestep.o plastic.o stress.o gridgen.o  acceleration.o sord.o
+
+sord-mO: $(OBJS)
+	$(FC) $(FLAGS) $^ -o $@ 
+
+# independent
+surfnormals.o:  surfnormals.f90
+	$(FC) $(FLAGS) -c $^
+
+util.o:         util.f90
+	$(FC) $(FLAGS) -c $^
+
+frio.o:         frio.f90
+	$(FC) $(FLAGS) -c $^
+
+bc.o:           bc.f90
+	$(FC) $(FLAGS) -c $^
+
+globals.o:      globals.f90
+	$(FC) $(FLAGS) -c $^ 
+
+diffcn.o:       diffcn.f90
+	$(FC) $(FLAGS) -c $^
+
+diffnc.o:       diffnc.f90
+	$(FC) $(FLAGS) -c $^
+
+hourglass.o:    hourglass.f90
+	$(FC) $(FLAGS) -c $^
+
+# dependent on m_frio
+mpi.o:          mpi.f90
+	$(FC) $(FLAGS) -c $^
+
+# dependent on globals.o
+arrays.o:       arrays.f90
+	$(FC) $(FLAGS) -c $^ 
+
+# dependent on m_globals, m_collective (mpi.o), m_util
+setup.o:        setup.f90
+	$(FC) $(FLAGS) -c $^
+
+stats.o:        stats.f90
+	$(FC) $(FLAGS) -c $^
+
+source.o:       source.f90
+	$(FC) $(FLAGS) -c $^
+
+# dependent on m_globals, m_collective (mpi.o), m_util, m_stats 
+checkpoint.o:   checkpoint.f90
+	$(FC) $(FLAGS) -c $^
+
+# dependent on m_globals, m_collective (mpi.o), m_util, m_frio
+fieldio.o:      fieldio.f90
+	$(FC) $(FLAGS) -c $^
+
+# dependent on m_globals, m_fieldio
+parameters.o:   parameters.f90
+	$(FC) $(FLAGS) -c $^
+
+# dependent on m_globals, m_collective (mpi.o), m_util, m_bc
+resample.o:     resample.f90
+	$(FC) $(FLAGS) -c $^ 
+
+# dependent on m_globals, m_collective (mpi.o), m_util, m_fieldio
+material.o:     material.f90
+	$(FC) $(FLAGS) -c $^
+
+# dependent on m_globas, m_util, m_fieldio, m_stats 
+timestep.o:     timestep.f90
+	$(FC) $(FLAGS) -c $^
+
+# dependent on m_globals, m_collective (mpi.o), m_util, m_bc, m_diffcn, m_fieldio
+inivolstress.o: inivolstress.f90
+	$(FC) $(FLAGS) -c $^ 
+
+# dependent on m_globals, m_util, m_source, m_diffnc, m_fieldio, m_stats
+plastic.o:       plastic.f90
+	$(FC) $(FLAGS) -c $^
+
+stress.o:       stress.f90
+	$(FC) $(FLAGS) -c $^
+
+# dependent on m_globals, m_collective (mpi.o), m_util, m_bc, m_diffnc, m_fieldio, m_surfnormals
+gridgen.o:      gridgen.f90
+	$(FC) $(FLAGS) -c $^
+
+# dependent on many above 
+thermpres.o:     thermpres.f90
+	$(FC) $(FLAGS) -c $^
+
+rupture.o:     rupture.f90
+	$(FC) $(FLAGS) -c $^
+
+acceleration.o: acceleration.f90
+	$(FC) $(FLAGS) -c $^
+
+#diffcn.o:      diffcn.f90
+#	$(FC) $(FLAGS) -c $^
+
+# depdentent on all above
+sord.o:         sord.f90
+	$(FC) $(FLAGS) -c $^
+
+
+# PHONY TARGETS 
+clean:
+	rm -rf $(OBJS) *.mod *.lst
+
+clean_all:
+	rm -rf $(OBJS) *.mod *.lst sord-mO 
+
+#cleanmore:
+#	rm fort.* core.* CHK* SS* V* SRCT*
