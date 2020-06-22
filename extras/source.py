@@ -419,7 +419,7 @@ def dsample( f, d ):
     g = np.zeros( n )
     for j in range( d ):
         for k in range( d ):
-            g = g + f[j,::d,k::d]
+            g = g + f[j::d,k::d]
     g = g / (d * d)
     return g
 
