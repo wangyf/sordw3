@@ -95,6 +95,27 @@ def src_write( history, nt, dt, t0, xi, w1, w2=None, path='' ):
         np.array( w2[2], 'f' ).tofile( path + 'w12' )
     return
 
+def fsp_read(filename, path=None, mks=True):
+    """
+    Reader for fsp data format in SRCMOD database
+    http://equake-rc.info/SRCMOD/fileformats/fsp/
+    """
+    fd = filename
+    if not isinstance(fd,io.IOBase):
+        fd = open( os.path.expanduser( fd ) ) 
+
+    meta={}
+
+    line = fd.readline()
+    while line:
+        line = fd.readline()
+        k = line.split()
+        if k[1] == 'Event':
+            meta['Event']=line[line.index(':')+2:]
+
+
+
+
 def srf_read( filename, path=None, mks=True ):
     """
     Reader for Graves Standard Rupture Format (SRF).
@@ -536,6 +557,170 @@ coulomb_footer = """
   5  ---------------------------- max. lat =       42.5
   6  ---------------------------- zero lat =       40.0
 """
+
+
+
+class Segment:
+    def __init__(self,colname,iseg,length,width,dx,dz,d2t,tlat,tlon,hyposeg,\
+                      hypoX,hypoZ,nsbfs,ncol):
+        self.colname = colname
+        self.iseg = iseg
+        self.len = length
+        self.wid = width
+        self.dx = dx
+        self.dz = dz
+        self.depth2top = d2t
+        self.toplat = tlat
+        self.toplon = tlon
+        self.hyposeg = hyposeg
+        self.hypoX = hypoX
+        self.hypoZ = hypoZ
+        self.nsbfs = nsbfs
+
+        self.slip = np.empty((nsbfs,ncol))
+
+def fsp_read(filename):
+    """
+    Reader for fsp data format in SRCMOD database
+    http://equake-rc.info/SRCMOD/fileformats/fsp/
+    """
+    fd = filename
+    if not isinstance(fd,io.IOBase):
+        fd = open( os.path.expanduser( fd ) ) 
+
+    meta={}
+
+    line = fd.readline()
+
+    nsubfault = 0
+    while line:
+        line = fd.readline()
+        k = line.split()
+
+        if len(k) < 3:
+            continue 
+
+        if k[0]=='%' and k[1] == 'Event':
+            meta['Event']=line[line.index(':')+2:].replace('\t','').replace('\n','')
+        if k[0]=='%' and k[1] == 'EventTAG:':
+            meta['EvtTAG']=k[2].replace(':','') #the filename is meta['EvtTAG']+'.fsp'
+        if k[0]=='%' and k[1] == 'Loc':
+            meta['Lat'] = float(k[5])
+            meta['Lon'] = float(k[8])
+            meta['Dep'] = float(k[11]) #km
+        if k[0]=='%' and k[1] == 'Size':
+            meta['Len']= float(k[5]) #km
+            meta['Wid']= float(k[9]) #km
+            meta['Mw']= float(k[13])
+            meta['M0']= float(k[16]) #Nm
+        if k[0]=='%' and k[1] == 'Mech':
+            meta['Strike'] = float(k[5])
+            meta['Dip'] = float(k[8])   
+            meta['Rake'] = float(k[11]) 
+            meta['Htop'] = float(k[14]) #km
+        if k[0]=='%' and k[1] == 'Rupt':
+            meta['Hypx'] = float(k[5])
+            meta['Hypz'] = float(k[9])
+            meta['Avvr'] = float(k[17]) #km/s
+        if k[0]=='%' and k[1] == 'Invs':
+            if k[3] == 'Nx':
+                meta['Nx'] = int(k[5])
+                meta['Nz'] = int(k[8])
+            if k[3] == 'Dx':
+                meta['Dx'] = float(k[5])
+                meta['Dz'] = float(k[9])
+        if k[0]=='%' and k[1]=='SOURCE':
+            line = fd.readline()
+            k = line.split()
+            if k[1] == 'Nsbfs':
+                meta['Planes'] = 'Single'
+                meta['Nsbfs'] = int(k[3])
+            elif k[1]=='X,Y,Z':
+                meta['Planes'] = 'Multi'
+                meta['mpdata'] = []
+
+        if 'Planes' in meta.keys():
+            if meta['Planes'] == 'Single':
+                if k[0]=='%' and k[1]=='LAT' and k[2]=='LON':
+                    meta['colname']= k[1:]
+                    meta['spdata']=np.empty((meta['Nsbfs'],len(k)-1))
+
+                    line = fd.readline()
+
+                    for i in range(meta['Nsbfs']):
+                        line = fd.readline()
+                        k = line.split()
+                        meta['spdata'][i,:] = np.array([float(ik) for ik in k])
+
+
+            if meta['Planes'] == 'Multi' and k[1] == 'SEGMENT':
+                iseg = int(k[3].replace(':',''))
+                strike = float(k[6])
+                dip = float(k[10])
+
+                line = fd.readline()
+                k = line.split()
+                length = float(k[3])
+                width =  float(k[7])
+
+                line = fd.readline()
+                k = line.split()
+                if k[1] == 'Dx':
+                    dx = float(k[3])
+                    dz = float(k[7])
+
+                    line = fd.readline()
+                    k = line.split()
+                    z2top = float(k[6])
+                else:
+                    dx = meta['Dx']
+                    dz = meta['Dz']
+                    z2top = float(k[6])
+
+                line = fd.readline()
+                line = fd.readline()
+                k = line.split()
+                tlat =  float(k[3])
+                tlon =  float(k[7]) 
+
+                line = fd.readline()
+                k = line.split()
+                hyposeg = int(k[5])
+                hypox =   float(k[10])
+                hypoz =   float(k[15])
+
+                line = fd.readline()
+                k = line.split()
+                nsbfs = int(k[3])
+
+                line = fd.readline()
+                line = fd.readline()
+                k = line.split()
+                colname = k[1:]
+
+                seg = Segment(colname,iseg,length,width,\
+                            dx,dz,z2top,tlat,tlon,hyposeg,\
+                          hypox,hypoz,nsbfs,len(colname))
+
+
+                line = fd.readline()
+
+                for i in range(nsbfs):
+                    line = fd.readline()
+                    k = line.split()
+                    seg.slip[i,:] = np.array([float(ik) for ik in k])
+
+                meta['mpdata'] = meta['mpdata']+ [seg,] 
+    return meta
+
+def loadallfsp(path):
+    database=[]
+    for file in os.listdir(path):
+        if file.endswith(".fsp"):
+            fname = os.path.join(path, file)
+            print('Loading',fname)
+            database = database + [fsp_read(fname),]
+    return database
 
 def command_line():
     """
