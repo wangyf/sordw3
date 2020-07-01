@@ -132,6 +132,22 @@ case( '+' )
     end do
     end do
     end do
+case( '=%' )
+    do l = i1(3), i2(3), di(3)
+    do k = i1(2), i2(2), di(2)
+    do j = i1(1), i2(1), di(1)
+        f(j,k,l) = f(j,k,l) * val
+    end do
+    end do
+    end do
+case( '+%' )
+    do l = i1(3), i2(3), di(3)
+    do k = i1(2), i2(2), di(2)
+    do j = i1(1), i2(1), di(1)
+        f(j,k,l) = f(j,k,l) + f(j,k,l) * val
+    end do
+    end do
+    end do
 case( '=i' )
     if ( all( i1 == i2 ) ) then
         do l = i1(3) - 1, i1(3)
@@ -461,6 +477,22 @@ case( '+' )
     do k = i1(2), i2(2), di(2)
     do j = i1(1), i2(1), di(1)
         f(j,k,l) = f(j,k,l) + val
+    end do
+    end do
+    end do
+case( '=%' )
+    do l = i1(3), i2(3), di(3)
+    do k = i1(2), i2(2), di(2)
+    do j = i1(1), i2(1), di(1)
+        f(j,k,l) = f(j,k,l) * val
+    end do
+    end do
+    end do
+case( '+%' )
+    do l = i1(3), i2(3), di(3)
+    do k = i1(2), i2(2), di(2)
+    do j = i1(1), i2(1), di(1)
+        f(j,k,l) = f(j,k,l) + f(j,k,l) * val
     end do
     end do
     end do
