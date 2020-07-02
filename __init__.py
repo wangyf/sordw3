@@ -293,7 +293,7 @@ def prepare_param( pm, itbuff ):
                 nc, tfunc, period, x1, x2, nb, ii, filename, val, fields = line[1:]
             elif mode in ['r', 'R', 'w', 'wi']:
                 fields, ii, filename = line[1:]
-            elif mode in ['', 's', 'i']:
+            elif mode in ['', 's', 'i', '%']:
                 fields, ii, val = line[1:]
             elif mode in ['f', 'fs', 'fi']:
                 fields, ii, val, tfunc, period = line[1:]
