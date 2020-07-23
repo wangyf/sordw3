@@ -697,22 +697,22 @@ t2(:,:,1,:) = vv(j3:j4,k3:k4,irup+1,:) - vv(j1:j2,k1:k2,irup,:) + &
 end select
 
 f2 = sum( t1 * t2, 4 )   !ts * sv density
-f5 = f5 + (f2 + f6) * dt / 2
+f5 = f5 + (f2 + f6) * dt * 0.5
 f6 = f2
 call fieldio( '>', 'erf', f5 )
 f2 = f2 * area
 call set_halo( f2, 0.0, i1core, i2core )
 
-efric = efric + dt * (sum( f2 ) + lastvalue)/2 !use triangle integral method
+efric = efric + dt * (sum( f2 ) + lastvalue) * 0.5 !use triangle integral method
 lastvalue = sum( f2 )
 
 ! Strain energy
 t2 = uu(j3:j4,k3:k4,l3:l4,:) - uu(j1:j2,k1:k2,l1:l2,:)
-f2 = sum( (t0 + tp + t1) * t2, 4 )
+f2 = sum( (t0 + tp + t1) * t2, 4 ) * 0.5
 call fieldio( '>', 'ere', f2 )
 f2 = f2 * area
 call set_halo( f2, 0.0, i1core, i2core )
-estrain = 0.5 * sum( f2 )
+estrain = sum( f2 )
 
 eradiat = estrain - efric
 
