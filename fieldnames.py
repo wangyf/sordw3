@@ -115,6 +115,8 @@ table = [
     ( 'tnm',   '\tau^n',          'Normal traction',                        'f',   ),
     ( 'tsm',   '|\tau^s|',        'Shear traction magnitude',               'f',   ),
     ( 'fr',    '\tau_c',          'Friction',                               'f',   ),
+    ( 'ere',   'dE_e',            'Strain energy density',                  'f',   ),
+    ( 'erf',   'dE_f',            'fracture+friction energy density',       'f',   ),
     ( 'sa1',   '\ddot s_x',       'Slip acceleration',                      'f',   ),
     ( 'sa2',   '\ddot s_y',       'Slip acceleration',                      'f',   ),
     ( 'sa3',   '\ddot s_z',       'Slip acceleration',                      'f',   ),

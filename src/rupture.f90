@@ -38,6 +38,7 @@ if ( master ) write( 0, * ) 'Rupture initialization'
 t1 = 0.0
 t2 = 0.0
 t3 = 0.0
+f5 = 0.0
 
 if ( friction == 'slipweakening' ) then
     co = 0.0
@@ -694,15 +695,22 @@ case ( 3 )
 t2(:,:,1,:) = vv(j3:j4,k3:k4,irup+1,:) - vv(j1:j2,k1:k2,irup,:) + &
                  0.5 * dt * t2(j3:j4,k3:k4,1,:)
 end select
-f2 = sum( t1 * t2, 4 ) * area
+
+f2 = sum( t1 * t2, 4 )   !ts * sv density
+f5 = f5 + (f2 + f6) * dt / 2
+f6 = f2
+call fieldio( '>', 'erf', f5 )
+f2 = f2 * area
 call set_halo( f2, 0.0, i1core, i2core )
 
-efric = efric + dt * (sum( f2 ) + lastvalue)/2
+efric = efric + dt * (sum( f2 ) + lastvalue)/2 !use triangle integral method
 lastvalue = sum( f2 )
 
 ! Strain energy
 t2 = uu(j3:j4,k3:k4,l3:l4,:) - uu(j1:j2,k1:k2,l1:l2,:)
-f2 = sum( (t0 + tp + t1) * t2, 4 ) * area
+f2 = sum( (t0 + tp + t1) * t2, 4 )
+call fieldio( '>', 'ere', f2 )
+f2 = f2 * area
 call set_halo( f2, 0.0, i1core, i2core )
 estrain = 0.5 * sum( f2 )
 

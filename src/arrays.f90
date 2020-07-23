@@ -166,7 +166,6 @@ if ( friction == 'rateandstate' .or. &
         svold(j,k,l), &
         sv0(j,k,l),   &
         f4(j,k,l),    &
-        f5(j,k,l),    &
         fun(j,k,l),   &
         dfun(j,k,l),  &
         delf(j,k,l)   )
@@ -204,7 +203,9 @@ allocate(         &
     ts(j,k,l),    &
     f1(j,k,l),    &
     f2(j,k,l),    &
-    f3(j,k,l) )
+    f3(j,k,l),    &
+    f5(j,k,l),    &
+    f6(j,k,l) )
 
 if ( pcdep == 'yes' ) then
     if ( master ) write( 0, * ) 'Regularized Response to Tn Variation'
