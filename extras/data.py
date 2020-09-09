@@ -16,7 +16,7 @@ def readbin(file,shape,inputdtype=None):
     fd = open( file ,'rb')
     if inputdtype == None:
         inputdtype = np.dtype( 'f8' ).str #real*4
-    matrix = np.fromfile(fd, inputdtype).reshape(shape).astype(idtype)
+    matrix = np.fromfile(fd, inputdtype).reshape(shape).astype(np.dtype( 'f8' ).str)
     print('Read size check',file,matrix.shape)
     fd.close()
     return matrix
