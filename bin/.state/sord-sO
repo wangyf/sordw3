@@ -1,4 +1,4 @@
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c globals.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c globals.f90
 ! Global variables
 module m_globals
 implicit none
@@ -12,7 +12,7 @@ real :: tm0, dt, dx(3), rho1, rho2, vp1, vp2, vs1, vs2, gam1, gam2, hourglass(2)
 real :: period, source1(3), source2(3), strike,dip,rake,m0, &
         vrup, rcrit, trelax, rrelax, tslope, &
         svtol, rnucl, tmnucl, delts, tv, pleta,tpdz, tplz, tpsubdt
-character(30) :: source, timefunction, eplasticity, plmodel, friction, pcdep, ivols
+character(30) :: source, timefunction, eplasticity, plmodel, friction, pcdep, ivols, tp_vw
 
 ! Miscellaneous parameters
 real, parameter :: pi = 3.14159265
@@ -109,30 +109,37 @@ real, allocatable, target, dimension(:,:,:) :: &
     tarr,           & ! arrest time
     tn, ts,         &
     tnpc, tnold,    &
+    tneff,          &
     mus, mud,       &
     dc,             &
     af, bf, v0, f0, &
     ll, fw, vw,     &
     psi,            &
     lpc,            &
-    ath, ahy, rhoc, &
-    tplam, tpw,     &
+    ath,            & ! thermal diffusivity  (mm^2/s)
+    ahy,            & ! hydraulic diffusiity (mm^2/s)
+    rhoc,           & ! specific heat (KPa/K)
+    tplam,          & ! undrained pore pressure change due to unit temperature change (Pa/K)
+    tpw,            & ! half-width of shear zone (mm)
+    Tempw,          & ! weakened temperature  (K)
+    tau_c,          & ! unweakened contact strength (KPa)
+    AspD,           & ! asperity diameter (mm)
     tini, pini,     &
     temp,porep,     &
     svtrl, svold,   &
     sv0,            &
     f1, f2, f3,     &
-    f4, f5,         &
+    f4, f5, f6,     &
     fun, dfun, delf    
 
 real, allocatable, target, dimension(:,:,:,:) :: &
     nhat,           & ! fault surface normals
     t0, ts0,        & 
     tp,             &
-    t1, t2, t3       
+    t1, t2, t3     
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c diffcn.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c diffcn.f90
 ! Difference operator, cell to node
 module m_diffcn
 implicit none
@@ -387,7 +394,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c diffnc.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c diffnc.f90
 ! Difference operator, node to cell
 module m_diffnc
 implicit none
@@ -616,7 +623,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c hourglass.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c hourglass.f90
 ! Hourglass corrections
 module m_hourglass
 implicit none
@@ -750,7 +757,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c bc.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c bc.f90
 ! Boundary conditions
 module m_bc
 implicit none
@@ -869,7 +876,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c surfnormals.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c surfnormals.f90
 ! Find surface normals
 module m_surfnormals
 implicit none
@@ -1001,7 +1008,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c util.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c util.f90
 ! Miscellaneous utilities
 module m_util
 implicit none
@@ -1234,7 +1241,7 @@ end function
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c frio.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c frio.f90
 ! Fortran real binary I/O
 module m_frio
 integer, parameter :: frio_file_null = -1
@@ -1283,7 +1290,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c serial.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c serial.f90
 ! Collective routines - serial version
 module m_collective
 use m_frio
@@ -1419,7 +1426,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c arrays.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c arrays.f90
 ! Allocate arrays
 module m_arrays
 implicit none
@@ -1588,13 +1595,12 @@ if ( friction == 'rateandstate' .or. &
         svold(j,k,l), &
         sv0(j,k,l),   &
         f4(j,k,l),    &
-        f5(j,k,l),    &
         fun(j,k,l),   &
         dfun(j,k,l),  &
         delf(j,k,l)   )
 
     if ( friction == 'thermalpressurization') then
-            if (master) write( 0, * ) 'Thermal Pressurization Friction'
+            if (master) write( 0, * ) 'Thermal Pressurization RS Friction'
         allocate(     &
         ath(j,k,l),   &
         ahy(j,k,l),   &
@@ -1605,6 +1611,15 @@ if ( friction == 'rateandstate' .or. &
         pini(j,k,l),  &
         temp(j,k,l),  &
         porep(j,k,l)  )
+
+        if (tp_vw == 'yes') then
+            if (master) write(0, *) 'Update vw in thermal Pressurization'
+            allocate( &
+                Tempw(j,k,l), &
+                tau_c(j,k,l), &
+                AspD(j,k,l))
+        end if
+
     end if 
 
 end if
@@ -1624,9 +1639,12 @@ allocate(         &
     tarr(j,k,l),  &
     tn(j,k,l),    &
     ts(j,k,l),    &
+    tneff(j,k,l), &
     f1(j,k,l),    &
     f2(j,k,l),    &
-    f3(j,k,l) )
+    f3(j,k,l),    &
+    f5(j,k,l),    &
+    f6(j,k,l) )
 
 if ( pcdep == 'yes' ) then
     if ( master ) write( 0, * ) 'Regularized Response to Tn Variation'
@@ -1640,7 +1658,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c fieldio.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c fieldio.f90
 ! Field input and output
 module m_fieldio
 implicit none
@@ -1772,6 +1790,22 @@ case( '+' )
     do k = i1(2), i2(2), di(2)
     do j = i1(1), i2(1), di(1)
         f(j,k,l) = f(j,k,l) + val
+    end do
+    end do
+    end do
+case( '=%' )
+    do l = i1(3), i2(3), di(3)
+    do k = i1(2), i2(2), di(2)
+    do j = i1(1), i2(1), di(1)
+        f(j,k,l) = f(j,k,l) * val
+    end do
+    end do
+    end do
+case( '+%' )
+    do l = i1(3), i2(3), di(3)
+    do k = i1(2), i2(2), di(2)
+    do j = i1(1), i2(1), di(1)
+        f(j,k,l) = f(j,k,l) + f(j,k,l) * val
     end do
     end do
     end do
@@ -2107,6 +2141,22 @@ case( '+' )
     end do
     end do
     end do
+case( '=%' )
+    do l = i1(3), i2(3), di(3)
+    do k = i1(2), i2(2), di(2)
+    do j = i1(1), i2(1), di(1)
+        f(j,k,l) = f(j,k,l) * val
+    end do
+    end do
+    end do
+case( '+%' )
+    do l = i1(3), i2(3), di(3)
+    do k = i1(2), i2(2), di(2)
+    do j = i1(1), i2(1), di(1)
+        f(j,k,l) = f(j,k,l) + f(j,k,l) * val
+    end do
+    end do
+    end do
 case( '=i' )
     if ( all( i1 == i2 ) ) then
         do l = i1(3) - 1, i1(3)
@@ -2379,7 +2429,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c stats.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c stats.f90
 ! Collect statistics
 module m_stats
 real :: &
@@ -2426,14 +2476,29 @@ if ( init ) then
 end if
 
 ! Buffer stats
+if (debug ==-1 .and.it==1) then
+    write( str, "( a,i6.6,a )" ) 'debug/max_', ipid, '.py'
+    open( 666, file=str, status='replace' )
+end if
+
 if ( modulo( it, itstats ) == 0 ) then
     j = j + 1
     vstats(1,j) = amax
     vstats(2,j) = vmax
     vstats(3,j) = umax
     vstats(4,j) = wmax
+
+    
+    if (debug == -1) then
+        write( 666, "(I06,ES20.10,ES20.10,ES20.10,ES20.10)" ) it,amax,vmax,umax,wmax
+    end if
+    
+
     rr = maxval( vstats )
-    if ( rr /= rr .or. rr > huge( rr ) ) stop 'NaN/Inf!'
+    if ( rr /= rr .or. rr > huge( rr ) ) then
+        write(0,*) ipid
+        stop 'NaN/Inf!'
+    end if
     if ( dofault ) then
         fstats(1,j) = samax
         fstats(2,j) = svmax
@@ -2451,6 +2516,7 @@ if ( modulo( it, itstats ) == 0 ) then
         estats(6,j) = slipint
     end if
 end if
+if (debug == -1 .and. it == nt) close(666)
 
 ! Write stats
 if ( j > 0 .and. ( modulo( it, itio ) == 0 .or. it == nt ) ) then
@@ -2537,7 +2603,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c parameters.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c parameters.f90
 ! Read model parameters
 module m_parameters
 implicit none
@@ -2629,6 +2695,7 @@ case( 'tv' );           read( str, *, iostat=ios ) key, op, tv
 case( 'tpdz' );         read( str, *, iostat=ios ) key, op, tpdz
 case( 'tplz' );         read( str, *, iostat=ios ) key, op, tplz 
 case( 'tpsubdt' );      read( str, *, iostat=ios ) key, op, tpsubdt
+case( 'tp_vw');         read( str, *, iostat=ios ) key, op, tp_vw
 case( 'friction' );     read( str, *, iostat=ios ) key, op, friction
 case( 'pcdep' );        read( str, *, iostat=ios ) key, op, pcdep
 case( 'faultnormal' );  read( str, *, iostat=ios ) key, op, faultnormal
@@ -2678,7 +2745,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c setup.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c setup.f90
 ! Setup model dimensions
 module m_setup
 implicit none
@@ -2770,7 +2837,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c gridgen.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c gridgen.f90
 ! Grid generation
 module m_grid_gen
 implicit none
@@ -3065,7 +3132,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c material.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c material.f90
 ! Material model
 module m_material
 implicit none
@@ -3317,7 +3384,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c source.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c source.f90
 ! Kinematic source
 module m_source
 implicit none
@@ -3531,7 +3598,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c inivolstress.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c inivolstress.f90
 ! Initialization of volume stresses 
 module m_inivolstress
 implicit none
@@ -3717,7 +3784,7 @@ end select
 end subroutine
 
 end module
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c thermpres.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c thermpres.f90
 ! Thermal pressurization
 module m_thermpres
 implicit none
@@ -3726,23 +3793,14 @@ real,dimension(:),allocatable :: z
 real,dimension(:,:,:,:),allocatable :: tmpt,pprs
 real,dimension(:,:,:,:),allocatable :: vold2,vold1,tsold1
 real,dimension(:,:,:), allocatable :: shearheat
+real,allocatable,dimension(:) :: omega,dtmpt,dtmpp
 contains
 
 ! Initiate array used in thermalpressurization
 subroutine ini_thermpres
-use m_globals, only : nm,ifn,dt,tpsubdt,tplz,tpdz,tini,pini
+use m_globals, only : nm,ifn,dt,tpsubdt,tplz,tpdz,tini,pini,temp,porep
 use m_fieldio
 integer :: i1(3),j,k,l
-
-! initialization diffusion distance array
-nz = floor( tplz / tpdz ) + 1
-allocate (z(nz))
-
-do j = 1, nz
-    z = ( j - 1 ) * tpdz
-end do
-
-subnt = floor(dt/tpsubdt)
 
 ! initialization of diffusion temperature and pore pressure array
 if ( ifn /= 0 ) then
@@ -3751,6 +3809,16 @@ if ( ifn /= 0 ) then
 else
     return
 end if
+
+! initialization diffusion distance array
+nz = floor( tplz / tpdz ) + 1
+allocate (z(nz))
+
+do j = 1, nz
+    z(j) = ( j - 1 ) * tpdz
+end do
+
+subnt = floor(dt/tpsubdt)
 
 j = i1(1)
 k = i1(2)
@@ -3771,6 +3839,10 @@ allocate( &
 allocate( &
     shearheat(j,k,l))
 
+allocate(omega(nz))
+allocate(dtmpt(nz))
+allocate(dtmpp(nz))
+
 ! initialization
 tmpt = 0.0
 pprs = 0.0
@@ -3778,12 +3850,18 @@ vold2 = 0.0
 vold1 = 0.0
 tsold1 = 0.0
 shearheat = 0.0
+omega = 0.0
+dtmpt = 0.0
+dtmpp = 0.0
 
 !set up initial value in shear zone 
 do j = 1, nz+2
     tmpt(:,:,:,j) = tini(:,:,:)
     pprs(:,:,:,j) = pini(:,:,:)
 end do
+
+temp = tini
+porep = pini
 
 end subroutine ini_thermpres
 
@@ -3803,93 +3881,73 @@ end subroutine
 ! compute shear heat at n-1 step
 subroutine compute_shearheat
     shearheat = (sum(vold2 * tsold1,4) + sum(vold1 * tsold1,4))/2.
+    ! write(0,*) shearheat(151,2,1)
 end subroutine
 
-! second derivative
-subroutine ddz2(field)
-    real,intent(inout) :: field(:)
-    real,dimension(:),allocatable :: f
-    integer :: i,n
+subroutine init_vw
+use m_globals
+    vw = pi * ath * ((Tempw - tini)/(tau_c/rhoc))**2/AspD*1e-3
+end subroutine
 
-    n = size(field)
-    allocate(f(n))
-    f = 0.0
 
-    do i = 2, n-1
-        f(i) = field(i+1)-2*field(i)+field(i-1)
-    end do
-
-    field = f
-
-    deallocate(f)
+subroutine update_vw
+use m_globals
+    vw = pi * ath * ((Tempw - temp)/(tau_c/rhoc))**2/AspD*1e-3
 end subroutine
 
 ! solve thermal pressurization equation
 subroutine update_thermpres
 use m_globals
-real,allocatable,dimension(:) :: dtmpt,dtmpp
-integer :: j,k,l,i1(3),subit
+integer :: j,k,l,i1(3),i2(3),subit
 
 ! initialization of diffusion temperature and pore pressure array
 if ( ifn /= 0 ) then
-    i1 = nm
+    i1 = i1node
+    i2 = i2node
     i1(ifn) = 1
+    i2(ifn) = 1
 else
     return
 end if
 
-allocate(dtmpt(nz+2))
-allocate(dtmpp(nz+2))
 ! loop over subfault patch
+do l = i1(3), i2(3)
+    do k = i1(2), i2(2)
+        do j = i1(1), i2(1)
 
-do l = 1, i1(3)
-    do k = 1, i1(2)
-        do j = 1, i1(1)
-            !update boundary condition
-            tmpt(j,k,l,1) = tmpt(j,k,l,3)
-            tmpt(j,k,l,nz+2) = tmpt(j,k,l,nz)
-            pprs(j,k,l,1) = pprs(j,k,l,3)
-            pprs(j,k,l,nz+2) = pprs(j,k,l,nz)
 
-            ! loop over substep in thermal pressurization
-            if (tpw(j,k,l)<1e-3) then ! slip on plane
-                do subit = 1, subnt
-                    !update temperature
-                    dtmpt = tmpt(j,k,l,:)
-                    call ddz2(dtmpt)
-                    dtmpt = dtmpt/(tpdz*tpdz)*ath(j,k,l) + shearheat(j,k,l)/ &
-                           (rhoc(j,k,l)*tpdz)
-                    ! Tnew = Told + dT*dt_sub
-                    tmpt(j,k,l,:) = tmpt(j,k,l,:) + dtmpt*tpsubdt
-    
-                    !update pore pressure
-                    dtmpp = pprs(j,k,l,:)
-                    call ddz2(dtmpp)
-                    dtmpp = dtmpp/(tpdz*tpdz)*ahy(j,k,l) + tplam(j,k,l)*dtmpt
-                    ! Pnew = Pold + dP*dt_sub
-                    pprs(j,k,l,:) = pprs(j,k,l,:) + dtmpp*tpsubdt
-                end do
-
-            else ! Gaussian shear zone
-                do subit = 1, subnt
-                    !update temperature
-                    dtmpt = tmpt(j,k,l,:)
-                    call ddz2(dtmpt)
-                    dtmpt = dtmpt/(tpdz*tpdz)*ath(j,k,l) + shearheat(j,k,l)* &
-                           exp(-z*z/(2*tpw(j,k,l)*tpw(j,k,l)))/&
-                            (rhoc(j,k,l)*tpw(j,k,l)*sqrt(2*pi))
-                    ! Tnew = Told + dT*dt_sub
-                    tmpt(j,k,l,:) = tmpt(j,k,l,:) + dtmpt*tpsubdt
-    
-                    !update pore pressure
-                    dtmpp = pprs(j,k,l,:)
-                    call ddz2(dtmpp)
-                    dtmpp = dtmpp/(tpdz*tpdz)*ahy(j,k,l) + tplam(j,k,l)*dtmpt
-                    ! Pnew = Pold + dP*dt_sub
-                    pprs(j,k,l,:) = pprs(j,k,l,:) + dtmpp*tpsubdt
-                end do
+            if (tpw(j,k,l)<1e-5) then ! slip on plane
+                omega = 0
+                omega(1) = shearheat(j,k,l)/tpdz
+            else
+                omega = shearheat(j,k,l) * &
+                       exp(-z*z/(2*tpw(j,k,l)*tpw(j,k,l)))/&
+                        (tpw(j,k,l)*sqrt(2*pi))
             end if
 
+            ! loop over substep in thermal pressurization
+            do subit = 1, subnt
+
+                !update boundary condition
+                tmpt(j,k,l,1) = tmpt(j,k,l,3)
+                tmpt(j,k,l,nz+2) = tmpt(j,k,l,nz)
+                pprs(j,k,l,1) = pprs(j,k,l,3)
+                pprs(j,k,l,nz+2) = pprs(j,k,l,nz)
+
+                ! diffusion
+                dtmpt = ath(j,k,l)*(tmpt(j,k,l,3:nz+2)-2*tmpt(j,k,l,2:nz+1)+tmpt(j,k,l,1:nz))/(tpdz*tpdz)+&
+                        omega/rhoc(j,k,l) 
+                dtmpp = ahy(j,k,l)*(pprs(j,k,l,3:nz+2)-2*pprs(j,k,l,2:nz+1)+pprs(j,k,l,1:nz))/(tpdz*tpdz)+&
+                        tplam(j,k,l)*dtmpt
+
+                ! undrained, adiabatic
+                ! dtmpt = omega/rhoc(j,k,l)
+                ! dtmpp = tplam(j,k,l)*dtmpt
+
+                tmpt(j,k,l,2:nz+1) = tmpt(j,k,l,2:nz+1) + dtmpt*tpsubdt
+                pprs(j,k,l,2:nz+1) = pprs(j,k,l,2:nz+1) + dtmpp*tpsubdt
+
+            end do
 
             ! store temperature and pore pressure on fault
             temp(j,k,l) = tmpt(j,k,l,2)
@@ -3897,8 +3955,7 @@ do l = 1, i1(3)
         end do 
     end do
 end do
-deallocate(dtmpt)
-deallocate(dtmpp)
+
 end subroutine update_thermpres
 
 
@@ -3915,7 +3972,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c rupture.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c rupture.f90
 ! Rupture boundary condition
 module m_rupture
 implicit none
@@ -3931,7 +3988,7 @@ use m_inivolstress
 use m_util
 use m_fieldio
 use m_stats
-use m_thermpres, only : ini_thermpres
+use m_thermpres, only : ini_thermpres,init_vw
 real :: xhypo(3), xi(3), w  !, rr
 integer :: i1(3), i2(3), i, j, k, l
 
@@ -3956,6 +4013,7 @@ if ( master ) write( 0, * ) 'Rupture initialization'
 t1 = 0.0
 t2 = 0.0
 t3 = 0.0
+f5 = 0.0
 
 if ( friction == 'slipweakening' ) then
     co = 0.0
@@ -3997,13 +4055,22 @@ if ( friction == 'rateandstate' .or. &
         temp = 0.0
         porep = 0.0
 
-    call fieldio2d( '<>', 'ath',    ath     )
-    call fieldio2d( '<>', 'ahy',    ahy     )
-    call fieldio2d( '<>', 'rhoc',   rhoc    )
-    call fieldio2d( '<>', 'tplam',  tplam   )
-    call fieldio2d( '<>', 'tpw',    tpw     )
-    call fieldio2d( '<>', 'tini',   tini    )! initial temperature
-    call fieldio2d( '<>', 'pini',   pini    )! initial pore pressure
+        call fieldio2d( '<>', 'ath',    ath     )
+        call fieldio2d( '<>', 'ahy',    ahy     )
+        call fieldio2d( '<>', 'rhoc',   rhoc    )
+        call fieldio2d( '<>', 'tplam',  tplam   )
+        call fieldio2d( '<>', 'tpw',    tpw     )
+        call fieldio2d( '<>', 'tini',   tini    )! initial temperature
+        call fieldio2d( '<>', 'pini',   pini    )! initial pore pressure
+
+        if (tp_vw == 'yes') then
+            Tempw = 0.0
+            tau_c = 0.0
+            AspD = 0.0
+            call fieldio2d( '<>', 'tempw',    Tempw     )
+            call fieldio2d( '<>', 'tau_c',    tau_c     )
+            call fieldio2d( '<>', 'aspD',     AspD      )
+        end if
     end if
 end if
 
@@ -4106,9 +4173,11 @@ do i = 1, 3
 end do
 
 f1 = sum( t0 * nhat, 4 ) 
+tneff = f1
 do i = 1, 3
     ts0(:,:,:,i) = t0(:,:,:,i) - f1 * nhat(:,:,:,i)
 end do
+if (friction == 'thermalpressurization') tneff = tneff + pini
 
 if ( ( rcrit > 0.0 .and. vrup > 0.0 ) .or. ( rnucl > 0.0 ) ) then
     xhypo = 0.0
@@ -4157,6 +4226,7 @@ if ( ifn /= 3 ) muf(:,:,2:l) = 0.5 * (muf(:,:,2:l) + muf(:,:,1:l-1))
 call invert( muf )
 
 ! Initial state, can be overwritten by read_checkpoint
+sl    =  0.0
 psv   =  0.0
 trup  =  1e9
 tarr  =  0.0
@@ -4166,6 +4236,7 @@ efric =  0.0
 call scalar_swap_halo( co,    nhalo )
 call scalar_swap_halo( area,  nhalo )
 call scalar_swap_halo( rhypo, nhalo )
+call scalar_swap_halo( tneff,nhalo)
 call vector_swap_halo( nhat,  nhalo )
 call vector_swap_halo( t0,    nhalo )
 call vector_swap_halo( ts0,   nhalo )
@@ -4192,15 +4263,26 @@ if ( friction == 'rateandstate' .or. &
        call scalar_swap_halo( rhoc,    nhalo ) 
        call scalar_swap_halo( tplam,   nhalo ) 
        call scalar_swap_halo( tpw,     nhalo ) 
-       call scalar_swap_halo( temp,    nhalo ) 
-       call scalar_swap_halo( porep,   nhalo ) 
+       call scalar_swap_halo( tini,    nhalo ) 
+       call scalar_swap_halo( pini,    nhalo ) 
+       if (tp_vw == 'yes') then
+            call scalar_swap_halo( Tempw,     nhalo ) 
+            call scalar_swap_halo( tau_c,     nhalo ) 
+            call scalar_swap_halo( AspD,      nhalo ) 
+       end if
     end if
 end if
 
 if ( pcdep == 'yes' ) call scalar_swap_halo( lpc,  nhalo )
 
 ! apply for thermal pressurization
-if (friction == 'thermalpressurization') call ini_thermpres
+if (friction == 'thermalpressurization') then
+    call ini_thermpres
+    if (tp_vw == 'yes') then
+        call init_vw
+        call scalar_swap_halo( vw,   nhalo )
+    end if
+end if
 
 end subroutine
 
@@ -4222,7 +4304,7 @@ real :: tol
 if ( ifn == 0 ) return
 if ( verb ) write( 0, * ) 'Rupture'
 
-if ( friction == 'rateandstate' ) then
+if ( friction == 'rateandstate' .or. friction == 'thermalpressurization') then
     nmax = 30
     tol = 1.e-3
 end if
@@ -4329,6 +4411,7 @@ end do
 tn = sum( t2 * nhat, 4 )
 !if ( faultopening == 1 ) tn = min( 0.0, tn )
 tn = min( 0.0, tn ) !trial normal stress
+tneff = tn 
 
 f1 = sum( t1 * nhat, 4 ) 
 do i = 1, 3
@@ -4351,25 +4434,44 @@ if ( friction == 'rateandstate' .or. &
     if ( it == 1 )  then
        
         !psi = af * log( 2.0 * v0 / svold * sinh( ts / (-tn) / af ) )
-        psi = af * sngl(dlog( 2.0 * v0 / svold * sinh( dble(ts / (-tn) / af )) ))
+        !psi = af * sngl(dlog( 2.0 * v0 / svold * sinh( dble(ts / (-tn) / af )) ))
+        if (friction == 'thermalpressurization') tneff = tn + porep
+        psi = af * log( 2.0 * v0 / svold * sinh( ts / (-tneff) / af ) )
+
         f1 = ts
         sv0 = svold
        
-        if ( pcdep == 'yes' ) then 
-            tnpc = tn 
-            tnold = tn
+        if ( pcdep == 'yes' ) then
+            tnpc = tneff
+            tnold = tneff
         end if 
         
         if (friction == 'thermalpressurization') then
             call fieldio( '>', 'temp', temp         )  
-            call fieldio( '>', 'porep', porep       ) 
+            call fieldio( '>', 'porep', porep       )
+            call fieldio( '>', 'vwv',   vw          )  
         end if 
     else
+        if (friction == 'thermalpressurization') then
+            if (verb) write(0,*) 'Thermal Pressurization'
+            ! compute shear heat production
+            call compute_shearheat
+            ! solve thermal pressurization eqation set
+            call update_thermpres
+            if (tp_vw == 'yes') call update_vw
+            
+            call fieldio( '>', 'temp',  temp        )  
+            call fieldio( '>', 'porep', porep       ) 
+            call fieldio( '>', 'vwv',   vw          ) 
+
+            tneff = tn + porep
+        end if
+
         where ( svold < sv0 ) svold = sv0
        
         if ( pcdep == 'yes' ) then 
             tnpc = tnpc + dt * svold / lpc *( tnold - tnpc )
-            tnold = tn
+            tnold = tneff
         end if
     
         !trail delta_v(n+1/2)
@@ -4396,13 +4498,13 @@ if ( friction == 'rateandstate' .or. &
             stop 'error in af or vini (af to large) or (vini to small)'
         end if  
 
-        !f2 = af * ( log( 2 * v0 ) + log( sinh(f2/af) ) - log( svold ) ) 
-        f2 = af * ( log( 2 * v0 ) + sngl(dlog( sinh(dble(f2/af))) ) - log( svold ) ) 
+        f2 = af * ( log( 2 * v0 ) + log( sinh(f2/af) ) - log( svold ) ) 
+        !f2 = af * ( log( 2 * v0 ) + sngl(dlog( sinh(dble(f2/af))) ) - log( svold ) ) 
 
         f4 = exp( - svold * dt / ll )
         
         psi = psi * f4 + ( 1.0 - f4 ) * f2 
-    
+
         f1 = 0.5 * svtrl / v0 * exp( psi / af ) 
         where ( f1 > 1.e6 )
             f1 = af * ( log(svtrl) - log(v0) ) + psi         
@@ -4419,12 +4521,13 @@ if ( friction == 'rateandstate' .or. &
         
         f1 = 0.5 * ( f1 + f2 ) 
     
+        
         if ( pcdep == 'yes' ) then
             f4 = dt * f3 * (-tnpc)
         else
-            f4 = dt * f3 * (-tn)
+            f4 = dt * f3 * (-tneff)
         end if
-         
+        
         f2 = psi + 0.82   
         where (f1 > f2)  f1 = f2
     
@@ -4457,13 +4560,9 @@ if ( friction == 'rateandstate' .or. &
         end do
         end do
         end do
-    
-    
-    
+
         !------------------------------------------  
         
-        !thermal pressurization
-        if (friction == 'thermalpressurization') then
         !V(n+1/2) v0 * (exp((f1-psi)/af) - exp(-(f1+psi)/af))
         !delta_v(n+1/2) = trial_delta_v(n+1/2)/trial_V(n+1/2)*
         ! V(n+1/2) in Steve's Notes
@@ -4474,31 +4573,19 @@ if ( friction == 'rateandstate' .or. &
         !end do
         !t2 become delta_v(n) = (delta_v(n+1/2)+delta_v(n-1/2))/2
     
-            if (verb) write(0,*) 'Thermpres'
-            ! compute shear heat production
-            call compute_shearheat
-            ! solve thermal pressurization eqation set
-            call update_thermpres
-    
-            if ( pcdep == 'yes' ) then 
-                f1 = -min( 0.0, tnpc + porep ) * f1
-            else
-                f1 = -min( 0.0, tn + porep ) * f1
-            end if  
-    
-            call fieldio( '>', 'temp', temp         )  
-            call fieldio( '>', 'porep', porep       )  
-    
-        else
         !normal rate and state friction
-            if ( pcdep == 'yes' ) then 
-                f1 = -min( 0.0, tnpc ) * f1
-            else
-                f1 = -min( 0.0, tn ) * f1
-            end if
+        if ( pcdep == 'yes' ) then 
+            f1 = -min( 0.0, tnpc ) * f1
+        else
+            f1 = -min( 0.0, tneff ) * f1
         end if
+        
     
         f2 = f1 / ts
+        !lock fault in PML zone
+        i1 = i1pml + 1
+        i2 = i2pml - 1
+        call set_halo( f2, 1.0, i1, i2 )
         do i = 1, 3
             t3(:,:,:,i) = f2 * t3(:,:,:,i)
         end do
@@ -4556,7 +4643,7 @@ end do
 
 ! Update acceleration
 do i = 1, 3
-    f2 = area * ( t1(:,:,:,i) - t0(:,:,:,i)  - tp(:,:,:,i) )
+    f2 = area * ( t1(:,:,:,i) - t0(:,:,:,i) - tp(:,:,:,i) )
     w1(j1:j2,k1:k2,l1:l2,i) = w1(j1:j2,k1:k2,l1:l2,i) + f2
     w1(j3:j4,k3:k4,l3:l4,i) = w1(j3:j4,k3:k4,l3:l4,i) - f2
 end do
@@ -4572,9 +4659,10 @@ call fieldio( '>', 'ts2', t3(:,:,:,2) )
 call fieldio( '>', 'ts3', t3(:,:,:,3) )
 call fieldio( '>', 'tsm', ts          )
 call fieldio( '>', 'tnm', tn          )
+call fieldio( '>', 'tneff',     tneff )
 call fieldio( '>', 'fr',  f1          )
 
-if ( friction == 'rateandstate' ) then
+if ( friction == 'rateandstate' .or. friction == 'thermalpressurization') then
     call fieldio( '>', 'psi', psi         )
 end if
 
@@ -4612,17 +4700,24 @@ case ( 3 )
 t2(:,:,1,:) = vv(j3:j4,k3:k4,irup+1,:) - vv(j1:j2,k1:k2,irup,:) + &
                  0.5 * dt * t2(j3:j4,k3:k4,1,:)
 end select
-f2 = sum( t1 * t2, 4 ) * area
+
+f2 = sum( t1 * t2, 4 )   !ts * sv density
+f5 = f5 + (f2 + f6) * dt * 0.5
+f6 = f2
+call fieldio( '>', 'erf', f5 )
+f2 = f2 * area
 call set_halo( f2, 0.0, i1core, i2core )
 
-efric = efric + dt * (sum( f2 ) + lastvalue)/2
+efric = efric + dt * (sum( f2 ) + lastvalue) * 0.5 !use triangle integral method
 lastvalue = sum( f2 )
 
 ! Strain energy
 t2 = uu(j3:j4,k3:k4,l3:l4,:) - uu(j1:j2,k1:k2,l1:l2,:)
-f2 = sum( (t0 + tp + t1) * t2, 4 ) * area
+f2 = sum( (t0 + tp + t1) * t2, 4 ) * 0.5
+call fieldio( '>', 'ere', f2 )
+f2 = f2 * area
 call set_halo( f2, 0.0, i1core, i2core )
-estrain = 0.5 * sum( f2 )
+estrain = sum( f2 )
 
 eradiat = estrain - efric
 
@@ -4645,7 +4740,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c resample.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c resample.f90
 ! Resample material arrays
 module m_resample
 implicit none
@@ -4697,7 +4792,6 @@ vv = 0.0
 uu = 0.0
 w1 = 0.0
 w2 = 0.0
-sl = 0.0
 p1 = 0.0
 p2 = 0.0
 p3 = 0.0
@@ -4740,7 +4834,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c checkpoint.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c checkpoint.f90
 ! Checkpoint restart
 module m_checkpoint
 implicit none
@@ -4831,7 +4925,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c timestep.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c timestep.f90
 ! Time integration
 module m_timestep
 implicit none
@@ -4862,9 +4956,11 @@ if ( ifn /= 0 ) then
     case( 3 ); t2(:,:,1,:) = vv(:,:,irup+1,:) - vv(:,:,irup,:)
     end select
     f2 = sqrt( sum( t2 * t2, 4 ) )
+
+    ! record slip velocity used for thermal pressurization
+    if (friction == 'thermalpressurization') call record_svel_ts(t2,'svo2')
 end if
-! record slip velocity used for thermal pressurization
-if (friction == 'thermalpressurization') call record_svel_ts(t2,'svo2')
+
 
 ! Velocity time integration
 tm = tm0 + dt * ( it - 1 ) - dt * 0.5
@@ -4970,7 +5066,7 @@ end if
 end subroutine
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c plastic.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c plastic.f90
 ! Off-fault plasticity models
 module m_plastic
 implicit none
@@ -5125,7 +5221,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c stress.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c stress.f90
 ! Stress calculation
 module m_stress
 implicit none
@@ -5368,7 +5464,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c acceleration.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c acceleration.f90
 ! Acceleration calculation
 module m_acceleration
 implicit none
@@ -5588,7 +5684,7 @@ end subroutine
 
 end module
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c sord.f90
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c sord.f90
 ! SORD main program
 program sord
 
@@ -5687,4 +5783,4 @@ call finalize
 
 end program
 
-gfortran -O3 -fbounds-check -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized globals.o diffcn.o diffnc.o hourglass.o bc.o surfnormals.o util.o frio.o serial.o arrays.o fieldio.o stats.o parameters.o setup.o gridgen.o material.o source.o inivolstress.o thermpres.o rupture.o resample.o checkpoint.o timestep.o plastic.o stress.o acceleration.o sord.o -o ../bin/sord-sO
+gfortran -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized globals.o diffcn.o diffnc.o hourglass.o bc.o surfnormals.o util.o frio.o serial.o arrays.o fieldio.o stats.o parameters.o setup.o gridgen.o material.o source.o inivolstress.o thermpres.o rupture.o resample.o checkpoint.o timestep.o plastic.o stress.o acceleration.o sord.o -o ../bin/sord-sO

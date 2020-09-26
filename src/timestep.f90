@@ -28,9 +28,11 @@ if ( ifn /= 0 ) then
     case( 3 ); t2(:,:,1,:) = vv(:,:,irup+1,:) - vv(:,:,irup,:)
     end select
     f2 = sqrt( sum( t2 * t2, 4 ) )
+
+    ! record slip velocity used for thermal pressurization
+    if (friction == 'thermalpressurization') call record_svel_ts(t2,'svo2')
 end if
-! record slip velocity used for thermal pressurization
-if (friction == 'thermalpressurization') call record_svel_ts(t2,'svo2')
+
 
 ! Velocity time integration
 tm = tm0 + dt * ( it - 1 ) - dt * 0.5

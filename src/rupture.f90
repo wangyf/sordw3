@@ -13,7 +13,7 @@ use m_inivolstress
 use m_util
 use m_fieldio
 use m_stats
-use m_thermpres, only : ini_thermpres
+use m_thermpres, only : ini_thermpres,init_vw
 real :: xhypo(3), xi(3), w  !, rr
 integer :: i1(3), i2(3), i, j, k, l
 
@@ -80,13 +80,22 @@ if ( friction == 'rateandstate' .or. &
         temp = 0.0
         porep = 0.0
 
-    call fieldio2d( '<>', 'ath',    ath     )
-    call fieldio2d( '<>', 'ahy',    ahy     )
-    call fieldio2d( '<>', 'rhoc',   rhoc    )
-    call fieldio2d( '<>', 'tplam',  tplam   )
-    call fieldio2d( '<>', 'tpw',    tpw     )
-    call fieldio2d( '<>', 'tini',   tini    )! initial temperature
-    call fieldio2d( '<>', 'pini',   pini    )! initial pore pressure
+        call fieldio2d( '<>', 'ath',    ath     )
+        call fieldio2d( '<>', 'ahy',    ahy     )
+        call fieldio2d( '<>', 'rhoc',   rhoc    )
+        call fieldio2d( '<>', 'tplam',  tplam   )
+        call fieldio2d( '<>', 'tpw',    tpw     )
+        call fieldio2d( '<>', 'tini',   tini    )! initial temperature
+        call fieldio2d( '<>', 'pini',   pini    )! initial pore pressure
+
+        if (tp_vw == 'yes') then
+            Tempw = 0.0
+            tau_c = 0.0
+            AspD = 0.0
+            call fieldio2d( '<>', 'tempw',    Tempw     )
+            call fieldio2d( '<>', 'tau_c',    tau_c     )
+            call fieldio2d( '<>', 'aspD',     AspD      )
+        end if
     end if
 end if
 
@@ -189,9 +198,11 @@ do i = 1, 3
 end do
 
 f1 = sum( t0 * nhat, 4 ) 
+tneff = f1
 do i = 1, 3
     ts0(:,:,:,i) = t0(:,:,:,i) - f1 * nhat(:,:,:,i)
 end do
+if (friction == 'thermalpressurization') tneff = tneff + pini
 
 if ( ( rcrit > 0.0 .and. vrup > 0.0 ) .or. ( rnucl > 0.0 ) ) then
     xhypo = 0.0
@@ -240,6 +251,7 @@ if ( ifn /= 3 ) muf(:,:,2:l) = 0.5 * (muf(:,:,2:l) + muf(:,:,1:l-1))
 call invert( muf )
 
 ! Initial state, can be overwritten by read_checkpoint
+sl    =  0.0
 psv   =  0.0
 trup  =  1e9
 tarr  =  0.0
@@ -249,6 +261,7 @@ efric =  0.0
 call scalar_swap_halo( co,    nhalo )
 call scalar_swap_halo( area,  nhalo )
 call scalar_swap_halo( rhypo, nhalo )
+call scalar_swap_halo( tneff,nhalo)
 call vector_swap_halo( nhat,  nhalo )
 call vector_swap_halo( t0,    nhalo )
 call vector_swap_halo( ts0,   nhalo )
@@ -275,15 +288,26 @@ if ( friction == 'rateandstate' .or. &
        call scalar_swap_halo( rhoc,    nhalo ) 
        call scalar_swap_halo( tplam,   nhalo ) 
        call scalar_swap_halo( tpw,     nhalo ) 
-       call scalar_swap_halo( temp,    nhalo ) 
-       call scalar_swap_halo( porep,   nhalo ) 
+       call scalar_swap_halo( tini,    nhalo ) 
+       call scalar_swap_halo( pini,    nhalo ) 
+       if (tp_vw == 'yes') then
+            call scalar_swap_halo( Tempw,     nhalo ) 
+            call scalar_swap_halo( tau_c,     nhalo ) 
+            call scalar_swap_halo( AspD,      nhalo ) 
+       end if
     end if
 end if
 
 if ( pcdep == 'yes' ) call scalar_swap_halo( lpc,  nhalo )
 
 ! apply for thermal pressurization
-if (friction == 'thermalpressurization') call ini_thermpres
+if (friction == 'thermalpressurization') then
+    call ini_thermpres
+    if (tp_vw == 'yes') then
+        call init_vw
+        call scalar_swap_halo( vw,   nhalo )
+    end if
+end if
 
 end subroutine
 
@@ -305,7 +329,7 @@ real :: tol
 if ( ifn == 0 ) return
 if ( verb ) write( 0, * ) 'Rupture'
 
-if ( friction == 'rateandstate' ) then
+if ( friction == 'rateandstate' .or. friction == 'thermalpressurization') then
     nmax = 30
     tol = 1.e-3
 end if
@@ -412,6 +436,7 @@ end do
 tn = sum( t2 * nhat, 4 )
 !if ( faultopening == 1 ) tn = min( 0.0, tn )
 tn = min( 0.0, tn ) !trial normal stress
+tneff = tn 
 
 f1 = sum( t1 * nhat, 4 ) 
 do i = 1, 3
@@ -434,25 +459,44 @@ if ( friction == 'rateandstate' .or. &
     if ( it == 1 )  then
        
         !psi = af * log( 2.0 * v0 / svold * sinh( ts / (-tn) / af ) )
-        psi = af * sngl(dlog( 2.0 * v0 / svold * sinh( dble(ts / (-tn) / af )) ))
+        !psi = af * sngl(dlog( 2.0 * v0 / svold * sinh( dble(ts / (-tn) / af )) ))
+        if (friction == 'thermalpressurization') tneff = tn + porep
+        psi = af * log( 2.0 * v0 / svold * sinh( ts / (-tneff) / af ) )
+
         f1 = ts
         sv0 = svold
        
-        if ( pcdep == 'yes' ) then 
-            tnpc = tn 
-            tnold = tn
+        if ( pcdep == 'yes' ) then
+            tnpc = tneff
+            tnold = tneff
         end if 
         
         if (friction == 'thermalpressurization') then
             call fieldio( '>', 'temp', temp         )  
-            call fieldio( '>', 'porep', porep       ) 
+            call fieldio( '>', 'porep', porep       )
+            call fieldio( '>', 'vwv',   vw          )  
         end if 
     else
+        if (friction == 'thermalpressurization') then
+            if (verb) write(0,*) 'Thermal Pressurization'
+            ! compute shear heat production
+            call compute_shearheat
+            ! solve thermal pressurization eqation set
+            call update_thermpres
+            if (tp_vw == 'yes') call update_vw
+            
+            call fieldio( '>', 'temp',  temp        )  
+            call fieldio( '>', 'porep', porep       ) 
+            call fieldio( '>', 'vwv',   vw          ) 
+
+            tneff = tn + porep
+        end if
+
         where ( svold < sv0 ) svold = sv0
        
         if ( pcdep == 'yes' ) then 
             tnpc = tnpc + dt * svold / lpc *( tnold - tnpc )
-            tnold = tn
+            tnold = tneff
         end if
     
         !trail delta_v(n+1/2)
@@ -479,13 +523,13 @@ if ( friction == 'rateandstate' .or. &
             stop 'error in af or vini (af to large) or (vini to small)'
         end if  
 
-        !f2 = af * ( log( 2 * v0 ) + log( sinh(f2/af) ) - log( svold ) ) 
-        f2 = af * ( log( 2 * v0 ) + sngl(dlog( sinh(dble(f2/af))) ) - log( svold ) ) 
+        f2 = af * ( log( 2 * v0 ) + log( sinh(f2/af) ) - log( svold ) ) 
+        !f2 = af * ( log( 2 * v0 ) + sngl(dlog( sinh(dble(f2/af))) ) - log( svold ) ) 
 
         f4 = exp( - svold * dt / ll )
         
         psi = psi * f4 + ( 1.0 - f4 ) * f2 
-    
+
         f1 = 0.5 * svtrl / v0 * exp( psi / af ) 
         where ( f1 > 1.e6 )
             f1 = af * ( log(svtrl) - log(v0) ) + psi         
@@ -502,12 +546,13 @@ if ( friction == 'rateandstate' .or. &
         
         f1 = 0.5 * ( f1 + f2 ) 
     
+        
         if ( pcdep == 'yes' ) then
             f4 = dt * f3 * (-tnpc)
         else
-            f4 = dt * f3 * (-tn)
+            f4 = dt * f3 * (-tneff)
         end if
-         
+        
         f2 = psi + 0.82   
         where (f1 > f2)  f1 = f2
     
@@ -540,13 +585,9 @@ if ( friction == 'rateandstate' .or. &
         end do
         end do
         end do
-    
-    
-    
+
         !------------------------------------------  
         
-        !thermal pressurization
-        if (friction == 'thermalpressurization') then
         !V(n+1/2) v0 * (exp((f1-psi)/af) - exp(-(f1+psi)/af))
         !delta_v(n+1/2) = trial_delta_v(n+1/2)/trial_V(n+1/2)*
         ! V(n+1/2) in Steve's Notes
@@ -557,31 +598,19 @@ if ( friction == 'rateandstate' .or. &
         !end do
         !t2 become delta_v(n) = (delta_v(n+1/2)+delta_v(n-1/2))/2
     
-            if (verb) write(0,*) 'Thermpres'
-            ! compute shear heat production
-            call compute_shearheat
-            ! solve thermal pressurization eqation set
-            call update_thermpres
-    
-            if ( pcdep == 'yes' ) then 
-                f1 = -min( 0.0, tnpc + porep ) * f1
-            else
-                f1 = -min( 0.0, tn + porep ) * f1
-            end if  
-    
-            call fieldio( '>', 'temp', temp         )  
-            call fieldio( '>', 'porep', porep       )  
-    
-        else
         !normal rate and state friction
-            if ( pcdep == 'yes' ) then 
-                f1 = -min( 0.0, tnpc ) * f1
-            else
-                f1 = -min( 0.0, tn ) * f1
-            end if
+        if ( pcdep == 'yes' ) then 
+            f1 = -min( 0.0, tnpc ) * f1
+        else
+            f1 = -min( 0.0, tneff ) * f1
         end if
+        
     
         f2 = f1 / ts
+        !lock fault in PML zone
+        i1 = i1pml + 1
+        i2 = i2pml - 1
+        call set_halo( f2, 1.0, i1, i2 )
         do i = 1, 3
             t3(:,:,:,i) = f2 * t3(:,:,:,i)
         end do
@@ -639,7 +668,7 @@ end do
 
 ! Update acceleration
 do i = 1, 3
-    f2 = area * ( t1(:,:,:,i) - t0(:,:,:,i)  - tp(:,:,:,i) )
+    f2 = area * ( t1(:,:,:,i) - t0(:,:,:,i) - tp(:,:,:,i) )
     w1(j1:j2,k1:k2,l1:l2,i) = w1(j1:j2,k1:k2,l1:l2,i) + f2
     w1(j3:j4,k3:k4,l3:l4,i) = w1(j3:j4,k3:k4,l3:l4,i) - f2
 end do
@@ -655,9 +684,10 @@ call fieldio( '>', 'ts2', t3(:,:,:,2) )
 call fieldio( '>', 'ts3', t3(:,:,:,3) )
 call fieldio( '>', 'tsm', ts          )
 call fieldio( '>', 'tnm', tn          )
+call fieldio( '>', 'tneff',     tneff )
 call fieldio( '>', 'fr',  f1          )
 
-if ( friction == 'rateandstate' ) then
+if ( friction == 'rateandstate' .or. friction == 'thermalpressurization') then
     call fieldio( '>', 'psi', psi         )
 end if
 

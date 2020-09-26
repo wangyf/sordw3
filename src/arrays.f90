@@ -171,7 +171,7 @@ if ( friction == 'rateandstate' .or. &
         delf(j,k,l)   )
 
     if ( friction == 'thermalpressurization') then
-            if (master) write( 0, * ) 'Thermal Pressurization Friction'
+            if (master) write( 0, * ) 'Thermal Pressurization RS Friction'
         allocate(     &
         ath(j,k,l),   &
         ahy(j,k,l),   &
@@ -182,6 +182,15 @@ if ( friction == 'rateandstate' .or. &
         pini(j,k,l),  &
         temp(j,k,l),  &
         porep(j,k,l)  )
+
+        if (tp_vw == 'yes') then
+            if (master) write(0, *) 'Update vw in thermal Pressurization'
+            allocate( &
+                Tempw(j,k,l), &
+                tau_c(j,k,l), &
+                AspD(j,k,l))
+        end if
+
     end if 
 
 end if
@@ -201,6 +210,7 @@ allocate(         &
     tarr(j,k,l),  &
     tn(j,k,l),    &
     ts(j,k,l),    &
+    tneff(j,k,l), &
     f1(j,k,l),    &
     f2(j,k,l),    &
     f3(j,k,l),    &

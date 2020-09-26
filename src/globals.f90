@@ -11,7 +11,7 @@ real :: tm0, dt, dx(3), rho1, rho2, vp1, vp2, vs1, vs2, gam1, gam2, hourglass(2)
 real :: period, source1(3), source2(3), strike,dip,rake,m0, &
         vrup, rcrit, trelax, rrelax, tslope, &
         svtol, rnucl, tmnucl, delts, tv, pleta,tpdz, tplz, tpsubdt
-character(30) :: source, timefunction, eplasticity, plmodel, friction, pcdep, ivols
+character(30) :: source, timefunction, eplasticity, plmodel, friction, pcdep, ivols, tp_vw
 
 ! Miscellaneous parameters
 real, parameter :: pi = 3.14159265
@@ -108,14 +108,21 @@ real, allocatable, target, dimension(:,:,:) :: &
     tarr,           & ! arrest time
     tn, ts,         &
     tnpc, tnold,    &
+    tneff,          &
     mus, mud,       &
     dc,             &
     af, bf, v0, f0, &
     ll, fw, vw,     &
     psi,            &
     lpc,            &
-    ath, ahy, rhoc, &
-    tplam, tpw,     &
+    ath,            & ! thermal diffusivity  (mm^2/s)
+    ahy,            & ! hydraulic diffusiity (mm^2/s)
+    rhoc,           & ! specific heat (KPa/K)
+    tplam,          & ! undrained pore pressure change due to unit temperature change (Pa/K)
+    tpw,            & ! half-width of shear zone (mm)
+    Tempw,          & ! weakened temperature  (K)
+    tau_c,          & ! unweakened contact strength (KPa)
+    AspD,           & ! asperity diameter (mm)
     tini, pini,     &
     temp,porep,     &
     svtrl, svold,   &

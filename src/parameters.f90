@@ -89,6 +89,7 @@ case( 'tv' );           read( str, *, iostat=ios ) key, op, tv
 case( 'tpdz' );         read( str, *, iostat=ios ) key, op, tpdz
 case( 'tplz' );         read( str, *, iostat=ios ) key, op, tplz 
 case( 'tpsubdt' );      read( str, *, iostat=ios ) key, op, tpsubdt
+case( 'tp_vw');         read( str, *, iostat=ios ) key, op, tp_vw
 case( 'friction' );     read( str, *, iostat=ios ) key, op, friction
 case( 'pcdep' );        read( str, *, iostat=ios ) key, op, pcdep
 case( 'faultnormal' );  read( str, *, iostat=ios ) key, op, faultnormal

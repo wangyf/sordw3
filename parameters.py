@@ -80,6 +80,7 @@ friction = 'slipweakening'      # or 'rateandstate', 'thermalpressurization'
 tpdz = 1                        # (TP) grid spaceing (mm) in thermalpressurization
 tplz = 100                      # (TP) diffusion distance (mm) ~sqrt(4*alpha*t)
 tpsubdt = 0.0001                # (TP) sub dt < 0.25 * tpdz^2/max(alpha_th,alpha_hy)
+tp_vw = 'no'                    # (TP) update vw by in-situ temperature yes or no
 
 # Prakash-Clifton gradual response to change of normal traction
 pcdep = 'no'                    # or 'yes'  

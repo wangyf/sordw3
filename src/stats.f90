@@ -44,14 +44,29 @@ if ( init ) then
 end if
 
 ! Buffer stats
+if (debug ==-1 .and.it==1) then
+    write( str, "( a,i6.6,a )" ) 'debug/max_', ipid, '.py'
+    open( 666, file=str, status='replace' )
+end if
+
 if ( modulo( it, itstats ) == 0 ) then
     j = j + 1
     vstats(1,j) = amax
     vstats(2,j) = vmax
     vstats(3,j) = umax
     vstats(4,j) = wmax
+
+    
+    if (debug == -1) then
+        write( 666, "(I06,ES20.10,ES20.10,ES20.10,ES20.10)" ) it,amax,vmax,umax,wmax
+    end if
+    
+
     rr = maxval( vstats )
-    if ( rr /= rr .or. rr > huge( rr ) ) stop 'NaN/Inf!'
+    if ( rr /= rr .or. rr > huge( rr ) ) then
+        write(0,*) ipid
+        stop 'NaN/Inf!'
+    end if
     if ( dofault ) then
         fstats(1,j) = samax
         fstats(2,j) = svmax
@@ -69,6 +84,7 @@ if ( modulo( it, itstats ) == 0 ) then
         estats(6,j) = slipint
     end if
 end if
+if (debug == -1 .and. it == nt) close(666)
 
 ! Write stats
 if ( j > 0 .and. ( modulo( it, itio ) == 0 .or. it == nt ) ) then

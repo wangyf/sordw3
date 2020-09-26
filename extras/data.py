@@ -378,6 +378,95 @@ def downsample_sphere( f, d ):
     g *= 1.0 / (d * d)
     return g
 
+
+def write_cvws(filename,header,*args):
+    """
+    Standard format for SCEC/USGS rupture dynamics verification project
+
+    # This is the file header:
+    # problem=TPV105
+    # author=A.Modeler
+    # date=2011/01/31
+    # code=MyCode
+    # code_version=3.7
+    # element_size=100 m
+    # time_step=0.005
+    # num_time_steps=2400
+    # location= on fault, 9 km along strike, 7.5km down-dip
+    # Column #1 = time (s)
+    # Column #2 = horizontal slip (m)
+    # Column #3 = horizontal slip rate (m/s)
+    # Column #4 = horizontal shear stress (MPa)
+    # Column #5 = vertical slip (m)
+    # Column #6 = vertical slip rate (m/s)
+    # Column #7 = vertical shear stress (MPa)
+    # Column #8 = effective normal stress (MPa)
+    # Column #9 = state variable psi (dimensionless)
+    # Column #10 = temperature (K)
+    # Column #11 = pore pressure (MPa)
+    #
+    # The line below lists the names of the data fields:
+    # (Although rendered as two lines on this printed page, it must be one
+    # single line in the actual file.)
+    t h-slip h-slip-rate h-shear-stress v-slip v-slip-rate v-shear-stress
+     n-stress psi temperature pressure
+    #
+    # Here is the time-series data.
+    # There should be 11 numbers on each line, but this page is not wide enough
+    # to show 11 numbers on a line, so we only show the first five.
+    0.000000E+00 0.000000E+00 0.000000E+00 7.000000E+01 0.000000E+00 ...
+    5.000000E-03 0.000000E+00 0.000000E+00 7.104040E+01 0.000000E+00 ...
+    1.000000E-02 0.000000E+00 0.000000E+00 7.239080E+01 0.000000E+00 ...
+    1.500000E-02 0.000000E+00 0.000000E+00 7.349000E+01 0.000000E+00 ...
+    2.000000E-02 0.000000E+00 0.000000E+00 7.440870E+01 0.000000E+00 ...
+    2.500000E-02 0.000000E+00 0.000000E+00 7.598240E+01 0.000000E+00 ...
+
+
+
+    # Example new contour-plot file.
+    #
+    # This is the file header:
+    # problem=TPV105
+    # author=A.Modeler
+    # date=2011/01/31
+    # code=MyCode
+    # code_version=3.7
+    # element_size=100 m
+    # Column #1 = horizontal coordinate, distance along strike (m)
+    # Column #2 = vertical coordinate, distance down-dip (m)
+    # Column #3 = rupture time (s)
+    #
+    # The line below lists the names of the data fields.
+    # It indicates that the first column contains the horizontal
+    # coordinate (j), the second column contains the vertical
+    # coordinate (k), and the third column contains the time (t).
+    j k t
+    #
+    # Here is the rupture history
+    6.000000E+02 7.000000E+03 3.100000E-02
+    6.000000E+02 7.100000E+03 4.900000E-02
+    6.000000E+02 7.200000E+03 6.700000E-02
+    7.000000E+02 7.000000E+03 1.230000E-01
+    7.000000E+02 7.100000E+03 1.350000E-01
+    7.000000E+02 7.2
+    """
+    fd=open( filename, 'w' )
+    fd.write( header )
+
+    ncol = len(args)
+    nt = len(args[0])
+    for it in range(nt):
+        for icol in range(ncol):
+            if icol == ncol-1:
+                fd.write('{0:12.6e} \n'.format(args[icol][it]))
+            else:
+                fd.write('{0:12.6e } '.format(args[icol][it]))
+
+    fd.close()
+
+    return
+
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
