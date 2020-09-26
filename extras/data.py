@@ -455,12 +455,13 @@ def write_cvws(filename,header,*args):
 
     ncol = len(args)
     nt = len(args[0])
+    # print("# {0} {1}".format(ncol,nt))
     for it in range(nt):
         for icol in range(ncol):
             if icol == ncol-1:
                 fd.write('{0:12.6e} \n'.format(args[icol][it]))
             else:
-                fd.write('{0:12.6e } '.format(args[icol][it]))
+                fd.write('{0:12.6e} '.format(args[icol][it]))
 
     fd.close()
 
