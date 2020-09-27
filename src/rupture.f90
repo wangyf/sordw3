@@ -474,7 +474,7 @@ if ( friction == 'rateandstate' .or. &
         if (friction == 'thermalpressurization') then
             call fieldio( '>', 'temp', temp         )  
             call fieldio( '>', 'porep', porep       )
-            call fieldio( '>', 'vwv',   vw          )  
+            if (tp_vw == 'yes') call fieldio( '>', 'vwv',   vw          )  
         end if 
     else
         if (friction == 'thermalpressurization') then
@@ -487,7 +487,7 @@ if ( friction == 'rateandstate' .or. &
             
             call fieldio( '>', 'temp',  temp        )  
             call fieldio( '>', 'porep', porep       ) 
-            call fieldio( '>', 'vwv',   vw          ) 
+            if (tp_vw == 'yes') call fieldio( '>', 'vwv',   vw          ) 
 
             tneff = tn + porep
         end if
