@@ -360,9 +360,15 @@ else
     f1 = 0.
     where( rhypo < rnucl ) f1 = exp( rhypo**2/(rhypo**2-rnucl**2) ) * f2 * delts
 
-    do i = 1, 3
-        tp(:,:,:,i) = ts0(:,:,:,i) * f1
-    end do
+    if (delts < 1e3) !delts is ratio of delta_tau and tau_0
+        do i = 1, 3
+            tp(:,:,:,i) = ts0(:,:,:,i) * f1
+        end do
+    else ! delts is absolute stress in Pa
+        do i = 1, 3
+            tp(:,:,:,i) = ts0(:,:,:,i) / sum( ts0 * ts0,4) * f1
+        end do
+    end if
 end if
 
 if ( it == 1 ) then
