@@ -120,12 +120,14 @@ doid: do iid = 1, 3; id = modulo( ic + iid - 2, 3 ) + 1
 ! Because S(tensor) * nhat = \int \partial S(tensor) /\partial x /Volume
 
 ! f_i = w_ij,j
-! Traction is computed through diffcn with oplevel of 5 (use mesh(w1))
+! 2020 May: Traction is computed through diffcn with oplevel of 5 (use mesh(w1))
+! 2020 Oct: I changed the oplevel of 5 to default (automatic chosed to 0 and 6);
+!           mesh adjacent to fault is already modified
 if ( ic == id ) then
-    call diffcn( s1, z1, ic, id, i1, i2, 5, bb, w1, dx1, dx2, dx3, dx )
+    call diffcn( s1, z1, ic, id, i1, i2, oplevel, bb, w1, dx1, dx2, dx3, dx )
 else
     i = 6 - ic - id
-    call diffcn( s1, z2, i, id, i1, i2, 5, bb, w1, dx1, dx2, dx3, dx )
+    call diffcn( s1, z2, i, id, i1, i2, oplevel, bb, w1, dx1, dx2, dx3, dx )
 end if
 
 ! Add contribution to force vector

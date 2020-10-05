@@ -182,6 +182,7 @@ if ( friction == 'rateandstate' .or. &
         pini(j,k,l),  &
         temp(j,k,l),  &
         porep(j,k,l)  )
+        if (tp_method=='fd') allocate(tpdz(j,k,l), tplz(j,k,l))
 
         if (tp_vw == 'yes') then
             if (master) write(0, *) 'Update vw in thermal Pressurization'

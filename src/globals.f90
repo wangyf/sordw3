@@ -5,13 +5,14 @@ implicit none
 ! Input parameters, see default-prm.py for documentation
 integer, dimension(3) :: np3, nn, bc1, bc2, n1expand, n2expand
 integer :: nt, itstats, itio, itcheck, itstop, npml, ppml, oplevel, mpin, &
-    mpout, debug, faultopening, irup, faultnormal, nsource
+    mpout, debug, faultopening, irup, faultnormal, nsource, tpnz
 real :: tm0, dt, dx(3), rho1, rho2, vp1, vp2, vs1, vs2, gam1, gam2, hourglass(2), &
     vdamp, rexpand, affine(9), gridnoise, ihypo(3), vpml, slipvector(3)
 real :: period, source1(3), source2(3), strike,dip,rake,m0, &
         vrup, rcrit, trelax, rrelax, tslope, &
-        svtol, rnucl, tmnucl, delts, tv, pleta,tpdz, tplz, tpsubdt
-character(30) :: source, timefunction, eplasticity, plmodel, friction, pcdep, ivols, tp_vw
+        svtol, rnucl, tmnucl, delts, tv, pleta, tpsubdt
+character(30) :: source, timefunction, eplasticity, plmodel, friction, pcdep, &
+        ivols, tp_vw, tp_method
 
 ! Miscellaneous parameters
 real, parameter :: pi = 3.14159265
@@ -115,6 +116,8 @@ real, allocatable, target, dimension(:,:,:) :: &
     ll, fw, vw,     &
     psi,            &
     lpc,            &
+    tpdz,           & ! thermal difussion distance (mm)
+    tplz,           & ! grid spacing (mm)
     ath,            & ! thermal diffusivity  (mm^2/s)
     ahy,            & ! hydraulic diffusiity (mm^2/s)
     rhoc,           & ! specific heat (KPa/K)

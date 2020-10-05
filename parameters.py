@@ -77,9 +77,9 @@ delts = 0.0                     # peak amplitude increase for Ts perturbation
 
 # friction type
 friction = 'slipweakening'      # or 'rateandstate', 'thermalpressurization'
-tpdz = 1                        # (TP) grid spaceing (mm) in thermalpressurization
-tplz = 100                      # (TP) diffusion distance (mm) ~sqrt(4*alpha*t)
-tpsubdt = 0.0001                # (TP) sub dt < 0.25 * tpdz^2/max(alpha_th,alpha_hy)
+tpnz    = -1                    # (TP) number of grid within diffusion zone
+tpsubdt = -1                    # (TP) sub dt < 0.25 * tpdz^2/max(alpha_th,alpha_hy)
+tp_method = 'Green'             # (TP) method for thermal pressurization: Green or fd
 tp_vw = 'no'                    # (TP) update vw by in-situ temperature yes or no
 
 # Prakash-Clifton gradual response to change of normal traction

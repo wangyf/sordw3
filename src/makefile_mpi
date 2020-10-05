@@ -1,6 +1,6 @@
 # Compiler and Flags
 FC = mpif90 
-FLAGS = -O3 -fimplicit-none -Wall -cpp -fdefault-real-8 -Ddoubleprecision
+FLAGS = -O0 -g -fbacktrace -fimplicit-none -Wall -fckeck=all -cpp -fdefault-real-8 -Ddoubleprecision
 
 OBJS = surfnormals.o util.o frio.o bc.o globals.o diffcn.o diffnc.o \
        hourglass.o mpi.o arrays.o setup.o stats.o source.o checkpoint.o \
