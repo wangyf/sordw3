@@ -16,13 +16,14 @@
 Requirements:	 MPI (Fortran), python3 (with authorization to write)  
 
 ## Step 1: Download the latest SORD 
-## git clone https://github.com/wangyf/sordw3
+	git clone https://github.com/wangyf/sordw3
 
-## Step 2: python -m sordw3.configure local
+## Step 2: 
+	python -m sordw3.configure local
 	Note: if errors reported, please modify compiler in conf/local/conf.py
 
-A successful message is like: 
-dtype = '<f4'
+	A successful message is like: 
+	dtype = '<f4'
 email = 'yongfeiwang'
 fortran_flags = {'g': ('-fbounds-check', '-ffpe-trap=invalid,zero,overflow', '-g', '-fcheck=all', '-cpp', '-fdefault-real-8', '-Ddoubleprecision', '-fimplicit-none', '-Wall -Wno-maybe-uninitialized', '-o'), 't': ('-fbounds-check', '-ffpe-trap=invalid,zero,overflow', '-fcheck=all', '-cpp', '-fdefault-real-8', '-Ddoubleprecision', '-fimplicit-none', '-Wall -Wno-maybe-uninitialized', '-o'), 'p': ('-O', '-pg', '-fcheck=all', '-cpp', '-fdefault-real-8', '-Ddoubleprecision', '-fimplicit-none', '-Wall -Wno-maybe-uninitialized', '-o'), 'O': ('-O3', '-fcheck=all', '-cpp', '-fdefault-real-8', '-Ddoubleprecision', '-fimplicit-none', '-Wall -Wno-maybe-uninitialized', '-o')}
 fortran_mpi = ('mpif90',)
@@ -50,7 +51,7 @@ rundir = 'run'
 user = 'yongfeiwang'
 
 ## Step 3: python -m sordw3.setup
-This step is compiling the executable. If successful, sord-sO and sord-mO will be stored in sordw3/bin/
+	This step is compiling the executable. If successful, sord-sO and sord-mO will be stored in sordw3/bin/
 
 A successful message is:
 mpif90 -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c globals.f90
