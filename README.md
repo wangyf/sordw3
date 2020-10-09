@@ -20,10 +20,11 @@ Requirements:	 MPI (Fortran), python3 (with authorization to write)
 
 ## Step 2: 
 	python -m sordw3.configure local
-	Note: if errors reported, please modify compiler in conf/local/conf.py
 
-	A successful message is like: 
-	dtype = '<f4'
+Note: if errors reported, please modify compiler in conf/local/conf.py
+```
+A successful message is like: 
+dtype = '<f4'
 email = 'yongfeiwang'
 fortran_flags = {'g': ('-fbounds-check', '-ffpe-trap=invalid,zero,overflow', '-g', '-fcheck=all', '-cpp', '-fdefault-real-8', '-Ddoubleprecision', '-fimplicit-none', '-Wall -Wno-maybe-uninitialized', '-o'), 't': ('-fbounds-check', '-ffpe-trap=invalid,zero,overflow', '-fcheck=all', '-cpp', '-fdefault-real-8', '-Ddoubleprecision', '-fimplicit-none', '-Wall -Wno-maybe-uninitialized', '-o'), 'p': ('-O', '-pg', '-fcheck=all', '-cpp', '-fdefault-real-8', '-Ddoubleprecision', '-fimplicit-none', '-Wall -Wno-maybe-uninitialized', '-o'), 'O': ('-O3', '-fcheck=all', '-cpp', '-fdefault-real-8', '-Ddoubleprecision', '-fimplicit-none', '-Wall -Wno-maybe-uninitialized', '-o')}
 fortran_mpi = ('mpif90',)
@@ -49,10 +50,12 @@ rate = 1000000.0
 run = False
 rundir = 'run'
 user = 'yongfeiwang'
-
-## Step 3: python -m sordw3.setup
-	This step is compiling the executable. If successful, sord-sO and sord-mO will be stored in sordw3/bin/
-
+```
+## Step 3: 
+	python -m sordw3.setup
+	
+This step is compiling the executable. If successful, sord-sO and sord-mO will be stored in sordw3/bin/	
+```
 A successful message is:
 mpif90 -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c globals.f90
 mpif90 -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c diffcn.f90
@@ -87,9 +90,11 @@ mpif90 -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -
 mpif90 -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c acceleration.f90
 mpif90 -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized -c sord.f90
 mpif90 -O3 -fcheck=all -cpp -fdefault-real-8 -Ddoubleprecision -fimplicit-none -Wall -Wno-maybe-uninitialized globals.o diffcn.o diffnc.o hourglass.o bc.o surfnormals.o util.o frio.o mpi.o arrays.o fieldio.o stats.o parameters.o setup.o gridgen.o material.o source.o inivolstress.o thermpres.o rupture.o resample.o checkpoint.o timestep.o plastic.o stress.o acceleration.o sord.o -o ../bin/sord-mO
-
-## Step 4: python -m sordw3.setup install 
-	If needed, you can reinstall SORD by “python -m sordw3.setup reinstall ”
+```
+## Step 4: 
+	python -m sordw3.setup install 
+	
+If needed, you can reinstall SORD by “python -m sordw3.setup reinstall ”
 
 If without any errors popping up, then congratulations, your SORD is ready to use.
 
