@@ -241,11 +241,11 @@ case( '=r', '+r', '=R', '+R' )
     end do
     end do
     if ( any( di > 1 ) ) then
-        i1 = io%ii(1,1:3) - nnoff
-        i2 = io%ii(2,1:3) - nnoff
+        i3 = io%ii(1,1:3) - nnoff
+        i4 = io%ii(2,1:3) - nnoff
         if ( any( di > nhalo .and. np3 > 1 ) ) stop 'di too large for nhalo'
         call scalar_swap_halo( fs1, nhalo )
-        call interpolate( fs1, i1, i2, di )
+        call interpolate( fs1, i3, i4, di )
     end if
     if ( io%mode(2:2) == 'R' ) then
         if ( m(1) == 1 ) then
@@ -589,11 +589,11 @@ case( '=r', '+r', '=R', '+R' )
     end do
     end do
     if ( any( di > 1 ) ) then
-        i1 = io%ii(1,1:3) - nnoff
-        i2 = io%ii(2,1:3) - nnoff
+        i3 = io%ii(1,1:3) - nnoff
+        i4 = io%ii(2,1:3) - nnoff
         if ( any( di > nhalo .and. np3 > 1 ) ) stop 'di too large for nhalo'
         call scalar_swap_halo( fs1, nhalo )
-        call interpolate( fs1, i1, i2, di )
+        call interpolate( fs1, i3, i4, di )
     end if
     temp_i2 = i2
     if ( io%mode(2:2) == 'R' ) then
