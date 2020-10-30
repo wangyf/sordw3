@@ -15,7 +15,7 @@ ifn = abs( faultnormal )
 ! Partition for parallelization
 if ( np0 == 1 ) np3 = 1
 nl3 = (nn - 1) / np3 + 1
-nhalo = 1
+nhalo = 4
 if ( ifn /= 0 ) nhalo(ifn) = 2
 nl3 = max( nl3, nhalo )
 np3 = (nn - 1) / nl3 + 1
