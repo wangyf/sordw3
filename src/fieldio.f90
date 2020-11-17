@@ -209,6 +209,7 @@ case( '=r', '+r', '=R', '+R' )
         io%ib = io%nb
         io%fh = frio_file_null
         if ( mpin /= 0 ) io%fh = file_null
+
     end if
     if ( io%ib == io%nb ) then
         n(4) = min( io%nb, (it2 - it) / dit + 1 )
@@ -240,12 +241,46 @@ case( '=r', '+r', '=R', '+R' )
     end do
     end do
     end do
+
     if ( any( di > 1 ) ) then
         i3 = io%ii(1,1:3) - nnoff
         i4 = io%ii(2,1:3) - nnoff
+
+        if ( io%mode(2:2) == 'R' ) then
+        do i = 1, 3
+            if ( m(i) == 1 ) then
+                i3(i) = 1
+                i4(i) = 1
+                n(i) = 1
+                o(i) = 0
+            end if
+        end do
+        end if
+
+        if (i4(1) >= i1core(1) .and. i4(1) <= i2core(1) .and. &
+            i2core(1) - i4(1) > 0 .and. i2core(1) - i4(1) <= di(1)) then
+            do i = 1,di(1)
+                fs1(i4(1)+i,:,:) = fs1(i4(1),:,:)
+            end do 
+        endif
+        if (i4(2) >= i1core(2) .and. i4(2) <= i2core(2) .and. &
+            i2core(2) - i4(2) > 0 .and. i2core(2) - i4(2) <= di(2)) then
+            do i = 1,di(2)
+                fs1(:,i4(2)+i,:) = fs1(:,i4(2),:)
+            end do 
+        endif
+        if (i4(3) >= i1core(3) .and. i4(3) <= i2core(3) .and. &
+            i2core(3) - i4(3) > 0 .and. i2core(3) - i4(3) <= di(3)) then
+            do i = 1,di(3)
+                fs1(:,i4(3)+i,:) = fs1(:,i4(3),:)
+            end do 
+        endif
+
         if ( any( di > nhalo .and. np3 > 1 ) ) stop 'di too large for nhalo'
-        call scalar_swap_halo( fs1, nhalo )
+        call scalar_swap_halo( fs1, nhalo, n)
         call interpolate( fs1, i3, i4, di )
+        call scalar_swap_halo( fs1, nhalo, n)
+
     end if
     if ( io%mode(2:2) == 'R' ) then
         if ( m(1) == 1 ) then
@@ -591,9 +626,41 @@ case( '=r', '+r', '=R', '+R' )
     if ( any( di > 1 ) ) then
         i3 = io%ii(1,1:3) - nnoff
         i4 = io%ii(2,1:3) - nnoff
+
+        if ( io%mode(2:2) == 'R' ) then
+        do i = 1, 3
+            if ( m(i) == 1 ) then
+                i3(i) = 1
+                i4(i) = 1
+                n(i) = 1
+                o(i) = 0
+            end if
+        end do
+        end if
+
+        if (i4(1) >= i1core(1) .and. i4(1) <= i2core(1) .and. &
+            i2core(1) - i4(1) > 0 .and. i2core(1) - i4(1) <= di(1)) then
+            do i = 1,di(1)
+                fs1(i4(1)+i,:,:) = fs1(i4(1),:,:)
+            end do 
+        endif
+        if (i4(2) >= i1core(2) .and. i4(2) <= i2core(2) .and. &
+            i2core(2) - i4(2) > 0 .and. i2core(2) - i4(2) <= di(2)) then
+            do i = 1,di(2)
+                fs1(:,i4(2)+i,:) = fs1(:,i4(2),:)
+            end do 
+        endif
+        if (i4(3) >= i1core(3) .and. i4(3) <= i2core(3) .and. &
+            i2core(3) - i4(3) > 0 .and. i2core(3) - i4(3) <= di(3)) then
+            do i = 1,di(3)
+                fs1(:,i4(3)+i,:) = fs1(:,i4(3),:)
+            end do 
+        endif
+
         if ( any( di > nhalo .and. np3 > 1 ) ) stop 'di too large for nhalo'
-        call scalar_swap_halo( fs1, nhalo )
+        call scalar_swap_halo( fs1, nhalo, n)
         call interpolate( fs1, i3, i4, di )
+        call scalar_swap_halo( fs1, nhalo, n)
     end if
     temp_i2 = i2
     if ( io%mode(2:2) == 'R' ) then

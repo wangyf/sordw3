@@ -204,14 +204,20 @@ end if
 end subroutine
 
 ! Scalar swap halo
-subroutine scalar_swap_halo( f, nh )
+subroutine scalar_swap_halo( f, nh, nin)
 use mpi
 real, intent(inout) :: f(:,:,:)
 integer, intent(in) :: nh(3)
-integer :: i, e, prev, next, nm(3), n(3), isend(3), irecv(3), tsend, trecv, comm
+integer, intent(in), optional :: nin(3)
+integer :: i, e, prev, next, nm(3), n(3), isend(3), irecv(3), tsend, trecv, comm, ninput(3)
+if (present(nin)) then
+    ninput = nin
+else
+    ninput = 999
+end if
 nm = (/ size(f,1), size(f,2), size(f,3) /)
 do i = 1, 3
-if ( np3(i) > 1 .and. nm(i) > 1 ) then
+if ( np3(i) > 1 .and. nm(i) > 1 .and. ninput(i) > 1) then
     comm = comm3d
     call mpi_cart_shift( comm, i-1, 1, prev, next, e )
     n = nm
@@ -250,14 +256,20 @@ end do
 end subroutine
 
 ! Vector swap halo
-subroutine vector_swap_halo( f, nh )
+subroutine vector_swap_halo( f, nh ,nin)
 use mpi
 real, intent(inout) :: f(:,:,:,:)
 integer, intent(in) :: nh(3)
-integer :: i, e, prev, next, nm(4), n(4), isend(4), irecv(4), tsend, trecv, comm
+integer, intent(in), optional :: nin(3)
+integer :: i, e, prev, next, nm(4), n(4), isend(4), irecv(4), tsend, trecv, comm, ninput(3)
+if (present(nin)) then
+    ninput = nin
+else
+    ninput = 999
+end if
 nm = (/ size(f,1), size(f,2), size(f,3), size(f,4) /)
 do i = 1, 3
-if ( np3(i) > 1 .and. nm(i) > 1 ) then
+if ( np3(i) > 1 .and. nm(i) > 1 .and. ninput(i) > 1) then
     comm = comm3d
     call mpi_cart_shift( comm, i-1, 1, prev, next, e )
     n = nm
