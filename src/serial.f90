@@ -83,17 +83,19 @@ rr = r
 end subroutine
 
 ! Scalar swap halo
-subroutine scalar_swap_halo( f, n )
+subroutine scalar_swap_halo( f, n, ninput)
 real, intent(inout) :: f(:,:,:)
 integer, intent(in) :: n(3)
+integer, intent(in), optional :: ninput(3)
 return
 f(1,1,1) = f(1,1,1) - n(1) + n(1)
 end subroutine
 
 ! Vector swap halo
-subroutine vector_swap_halo( f, n )
+subroutine vector_swap_halo( f, n, ninput)
 real, intent(inout) :: f(:,:,:,:)
 integer, intent(in) :: n(3)
+integer, intent(in), optional :: ninput(3)
 return
 f(1,1,1,1) = f(1,1,1,1) - n(1) + n(1)
 end subroutine
