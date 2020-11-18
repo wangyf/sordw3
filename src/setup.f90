@@ -15,15 +15,19 @@ ifn = abs( faultnormal )
 ! Partition for parallelization
 if ( np0 == 1 ) np3 = 1
 nl3 = (nn - 1) / np3 + 1
+
+! ----- modified nhalo for sparse data input
+!nhalo = 1
+!if ( ifn /= 0 ) nhalo(ifn) = 2
 nhalo = 4
-if ( ifn /= 0 ) nhalo(ifn) = 2
+
 nl3 = max( nl3, nhalo )
 np3 = (nn - 1) / nl3 + 1
 call rank( ip3, ipid, np3 )
 nnoff = nl3 * ip3 - nhalo
 
 ! Master process
-ip3root = (ihypo - 1.0) / nl3
+ip3root = (ihypo - 1) / nl3
 master = all( ip3 == ip3root )
 
 ! Size of arrays

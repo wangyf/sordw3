@@ -120,9 +120,10 @@ end do
 end subroutine
 
 ! In-place linear interpolation 
-subroutine interpolate( f, i3, i4, di )
+subroutine interpolate( f, i3, i4, di, method)
 real, intent(inout) :: f(:,:,:)
 integer, intent(in) :: i3(3), i4(3), di(3)
+character(*),intent(in) :: method
 integer :: i1(3), i2(3), n(3), i, j, k, l, d
 real :: h1, h2
 n = (/ size(f,1), size(f,2), size(f,3) /)
@@ -130,42 +131,82 @@ i1 = i3
 i2 = i4
 where( i1 < 1 ) i1 = i1 + (-i1 / di + 1) * di
 where( i2 > n ) i2 = i1 + (n - i1) / di * di
-d = di(1)
-do i = 1, d - 1
-    h1 = 1.0 / d * i
-    h2 = 1.0 / d * ( d - i )
-    do l = i1(3), i2(3), di(3)
-    do k = i1(2), i2(2), di(2)
-    do j = i1(1), i2(1) - d, d
-        f(j+i,k,l) = h1 * f(j,k,l) + h2 * f(j+d,k,l)
+
+! for node function
+if (method == 'linear') then
+    d = di(1)
+    do i = 1, d - 1
+        h1 = 1.0 / d * i
+        h2 = 1.0 / d * ( d - i )
+        do l = i1(3), i2(3), di(3)
+        do k = i1(2), i2(2), di(2)
+        do j = i1(1), i2(1) - d, d
+            f(j+i,k,l) = h1 * f(j,k,l) + h2 * f(j+d,k,l)
+        end do
+        end do
+        end do
     end do
+    d = di(2)
+    do i = 1, d - 1
+        h1 = 1.0 / d * i
+        h2 = 1.0 / d * ( d - i )
+        do l = i1(3), i2(3), di(1)
+        do k = i1(2), i2(2) - d, d
+        do j = i1(1), i2(1)
+            f(j,k+i,l) = h1 * f(j,k,l) + h2 * f(j,k+d,l)
+        end do
+        end do
+        end do
     end do
+    d = di(3)
+    do i = 1, d - 1
+        h1 = 1.0 / d * i
+        h2 = 1.0 / d * ( d - i )
+        do l = i1(3), i2(3) - d, d
+        do k = i1(2), i2(2)
+        do j = i1(1), i2(1)
+            f(j,k,l+i) = h1 * f(j,k,l) + h2 * f(j,k,l+d)
+        end do
+        end do
+        end do
     end do
-end do
-d = di(2)
-do i = 1, d - 1
-    h1 = 1.0 / d * i
-    h2 = 1.0 / d * ( d - i )
-    do l = i1(3), i2(3), di(1)
-    do k = i1(2), i2(2) - d, d
-    do j = i1(1), i2(1)
-        f(j,k+i,l) = h1 * f(j,k,l) + h2 * f(j,k+d,l)
+! for cell function
+else if (method == 'nearest') then
+    d = di(1)
+    do i = 1, d - 1
+        do l = i1(3), i2(3), di(3)
+        do k = i1(2), i2(2), di(2)
+        do j = i1(1), i2(1), d
+            f(j+i,k,l) = f(j,k,l)
+        end do
+        end do
+        end do
     end do
+    d = di(2)
+    do i = 1, d - 1
+        do l = i1(3), i2(3), di(1)
+        do k = i1(2), i2(2), d
+        do j = i1(1), i2(1)
+            f(j,k+i,l) = f(j,k,l)
+        end do
+        end do
+        end do
     end do
+    d = di(3)
+    do i = 1, d - 1
+        do l = i1(3), i2(3), d
+        do k = i1(2), i2(2)
+        do j = i1(1), i2(1)
+            f(j,k,l+i) = f(j,k,l)
+        end do
+        end do
+        end do
     end do
-end do
-d = di(3)
-do i = 1, d - 1
-    h1 = 1.0 / d * i
-    h2 = 1.0 / d * ( d - i )
-    do l = i1(3), i2(3) - d, d
-    do k = i1(2), i2(2)
-    do j = i1(1), i2(1)
-        f(j,k,l+i) = h1 * f(j,k,l) + h2 * f(j,k,l+d)
-    end do
-    end do
-    end do
-end do
+else
+    write(0,*) 'Invalid interpolation method'
+    stop
+end if
+
 end subroutine
 
 ! Time function

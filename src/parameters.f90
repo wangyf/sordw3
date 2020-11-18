@@ -11,6 +11,9 @@ character(12) :: key
 character(1) :: op
 character(256) :: line
 
+! initiate node and cell list
+call ini_nodecelllist
+
 ! I/O pointers
 allocate( io0 )
 io => io0
@@ -121,6 +124,14 @@ case default
         read( str, *, iostat=ios ) io%mode, io%nc, io%tfunc, &
             io%period, io%x1, io%x2, io%nb, io%ii, io%filename, &
             io%val, io%field
+        if (any(nodelist==io%field)) then
+            io%nodecell='nod'
+        else if (any(celllist==io%field)) then
+            io%nodecell='cel'
+        else
+            write(0,*) 'Unknown field for node/cell',io%field
+            stop
+        end if
     case default; ios = 1
     end select
 end select
@@ -135,6 +146,142 @@ end do doline
 
 close( 1 )
 
+end subroutine
+
+
+subroutine ini_nodecelllist
+use m_globals
+nodelist(1)     = 'x1'
+nodelist(2)     = 'x2'
+nodelist(3)     = 'x3'
+nodelist(4)     = 'f1'
+nodelist(5)     = 'f2'
+nodelist(6)     = 'f3'
+nodelist(7)     = 'a1'
+nodelist(8)     = 'a2'
+nodelist(9)     = 'a3'
+nodelist(10)    = 'am2'
+nodelist(11)    = 'v1'
+nodelist(12)    = 'v2'
+nodelist(13)    = 'v3'
+nodelist(14)    = 'vm2'
+nodelist(15)    = 'u1'
+nodelist(16)    = 'u2'
+nodelist(17)    = 'u3'
+nodelist(18)    = 'um2'
+nodelist(19)    = 'co'
+nodelist(20)    = 'mus'
+nodelist(21)    = 'mud'
+nodelist(22)    = 'dc'
+nodelist(23)    = 'af'
+nodelist(24)    = 'bf'
+nodelist(25)    = 'v0'
+nodelist(26)    = 'f0'
+nodelist(27)    = 'll'
+nodelist(28)    = 'fw'
+nodelist(29)    = 'vw'
+nodelist(30)    = 'psi'
+nodelist(31)    = 'ath'
+nodelist(32)    = 'ahy'
+nodelist(33)    = 'rhoc'
+nodelist(34)    = 'tplam'
+nodelist(35)    = 'tpw'
+nodelist(36)    = 'tini'
+nodelist(37)    = 'pini'
+nodelist(38)    = 'tempw'
+nodelist(39)    = 'tau_c'
+nodelist(40)    = 'aspD'
+nodelist(41)    = 'lpc'
+nodelist(42)    = 'ts'
+nodelist(43)    = 'td'
+nodelist(44)    = 'tn'
+nodelist(45)    = 'area'
+nodelist(46)    = 'nhat1'
+nodelist(47)    = 'nhat2'
+nodelist(48)    = 'nhat3'
+nodelist(49)    = 'temp'
+nodelist(50)    = 'porep'
+nodelist(51)    = 'vwv'
+nodelist(52)    = 't1'
+nodelist(53)    = 't2'
+nodelist(54)    = 't3'
+nodelist(55)    = 'ts1'
+nodelist(56)    = 'ts2'
+nodelist(57)    = 'ts3'
+nodelist(58)    = 'tsm'
+nodelist(59)    = 'tnm'
+nodelist(60)    = 'tneff'
+nodelist(61)    = 'fr'
+nodelist(62)    = 'sa1'
+nodelist(63)    = 'sa2'
+nodelist(64)    = 'sa3'
+nodelist(65)    = 'sam'
+nodelist(66)    = 'sv1'
+nodelist(67)    = 'sv2'
+nodelist(68)    = 'sv3'
+nodelist(69)    = 'svm'
+nodelist(70)    = 'psv'
+nodelist(71)    = 'su1'
+nodelist(72)    = 'su2'
+nodelist(73)    = 'su3'
+nodelist(74)    = 'sum'
+nodelist(75)    = 'sl'
+nodelist(76)    = 'erf'
+nodelist(77)    = 'ere'
+nodelist(78)    = 'trup'
+nodelist(79)    = 'tarr'
+
+
+celllist(1)     = 'c1'
+celllist(2)     = 'c2'
+celllist(3)     = 'c3'
+celllist(4)     = 'vc'
+celllist(5)     = 'a11'
+celllist(6)     = 'a22'
+celllist(7)     = 'a33'
+celllist(8)     = 'a23'
+celllist(9)     = 'a31'
+celllist(10)    = 'a12'
+celllist(11)    = 'rho'
+celllist(12)    = 'vp'
+celllist(13)    = 'vs'
+celllist(14)    = 'gam'
+celllist(15)    = 'mco'
+celllist(16)    = 'phi'
+celllist(17)    = 'plb'
+celllist(18)    = 'plh'
+celllist(19)    = 'mu'
+celllist(20)    = 'lam'
+celllist(21)    = 'yy'
+celllist(22)    = 'bk'
+celllist(23)    = 'plcls'
+celllist(24)    = 'epm'
+celllist(25)    = 'gammap'
+celllist(26)    = 's11'
+celllist(27)    = 's22'
+celllist(28)    = 's33'
+celllist(29)    = 's23'
+celllist(30)    = 's31'
+celllist(31)    = 's12'
+celllist(32)    = 'e11'
+celllist(33)    = 'e22'
+celllist(34)    = 'e33'
+celllist(35)    = 'e23'
+celllist(36)    = 'e31'
+celllist(37)    = 'e12'
+celllist(38)    = 'w11'
+celllist(39)    = 'w22'
+celllist(40)    = 'w33'
+celllist(41)    = 'w23'
+celllist(42)    = 'w31'
+celllist(43)    = 'w12'
+celllist(44)    = 'wm2'
+celllist(45)    = 'mr11'
+celllist(46)    = 'mr22'
+celllist(47)    = 'mr33'
+celllist(48)    = 'mr23'
+celllist(49)    = 'mr31'
+celllist(50)    = 'mr12'
 end subroutine
 
 end module

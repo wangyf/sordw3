@@ -7,6 +7,7 @@ type t_io
     character(10) :: field          ! field variable, see fieldnames.py for possibilities
     character(8) :: tfunc          ! see time_function in util.f90 for possibilities
     character(3) :: mode           ! 'r' read, 'w' write
+    character(3) :: nodecell
     integer :: ii(3,4), nc, nb, ib, fh
     real :: x1(3), x2(3), val, period
     real, pointer :: buff(:,:)     ! buffer for storing mutliple time steps
@@ -45,6 +46,14 @@ integer :: i1(3), i2(3), i3(3), i4(3), di(3), m(4), n(4), o(4), &
 real :: val
 
 fs1 = 0.0
+
+if (any(nodelist==field)) then
+    if (master .and. debug>5) write(0,*) field, ' is a node function'
+else if (any(celllist==field)) then
+    if (master .and. debug>5) write(0,*) field, ' is a cell function'
+else
+    write(0,*) 'Unknown field for node/cell',field
+end if
 
 ! Start timer
 val = timer( 2 )
@@ -257,28 +266,13 @@ case( '=r', '+r', '=R', '+R' )
         end do
         end if
 
-        if (i4(1) >= i1core(1) .and. i4(1) <= i2core(1) .and. &
-            i2core(1) - i4(1) > 0 .and. i2core(1) - i4(1) <= di(1)) then
-            do i = 1,di(1)
-                fs1(i4(1)+i,:,:) = fs1(i4(1),:,:)
-            end do 
-        endif
-        if (i4(2) >= i1core(2) .and. i4(2) <= i2core(2) .and. &
-            i2core(2) - i4(2) > 0 .and. i2core(2) - i4(2) <= di(2)) then
-            do i = 1,di(2)
-                fs1(:,i4(2)+i,:) = fs1(:,i4(2),:)
-            end do 
-        endif
-        if (i4(3) >= i1core(3) .and. i4(3) <= i2core(3) .and. &
-            i2core(3) - i4(3) > 0 .and. i2core(3) - i4(3) <= di(3)) then
-            do i = 1,di(3)
-                fs1(:,i4(3)+i,:) = fs1(:,i4(3),:)
-            end do 
-        endif
-
         if ( any( di > nhalo .and. np3 > 1 ) ) stop 'di too large for nhalo'
         call scalar_swap_halo( fs1, nhalo, n)
-        call interpolate( fs1, i3, i4, di )
+        if (io%nodecell=='nod') then
+            call interpolate( fs1, i3, i4, di, 'linear')
+        else
+            call interpolate( fs1, i3, i4, di, 'nearest')
+        end if
         call scalar_swap_halo( fs1, nhalo, n)
 
     end if
@@ -429,6 +423,14 @@ real :: val
 
 fs1 = 0.0
 
+if (any(nodelist==field)) then
+    if (master .and. debug>5) write(0,*) field, ' is a node function'
+else if (any(celllist==field)) then
+    if (master .and. debug>5) write(0,*) field, ' is a cell function'
+else
+    write(0,*) 'Unknown field for node/cell',field
+end if
+
 ! Start timer
 val = timer( 2 )
 !if ( verb ) write( 0, * ) 'Field I/O ', passes, field
@@ -638,28 +640,13 @@ case( '=r', '+r', '=R', '+R' )
         end do
         end if
 
-        if (i4(1) >= i1core(1) .and. i4(1) <= i2core(1) .and. &
-            i2core(1) - i4(1) > 0 .and. i2core(1) - i4(1) <= di(1)) then
-            do i = 1,di(1)
-                fs1(i4(1)+i,:,:) = fs1(i4(1),:,:)
-            end do 
-        endif
-        if (i4(2) >= i1core(2) .and. i4(2) <= i2core(2) .and. &
-            i2core(2) - i4(2) > 0 .and. i2core(2) - i4(2) <= di(2)) then
-            do i = 1,di(2)
-                fs1(:,i4(2)+i,:) = fs1(:,i4(2),:)
-            end do 
-        endif
-        if (i4(3) >= i1core(3) .and. i4(3) <= i2core(3) .and. &
-            i2core(3) - i4(3) > 0 .and. i2core(3) - i4(3) <= di(3)) then
-            do i = 1,di(3)
-                fs1(:,i4(3)+i,:) = fs1(:,i4(3),:)
-            end do 
-        endif
-
         if ( any( di > nhalo .and. np3 > 1 ) ) stop 'di too large for nhalo'
         call scalar_swap_halo( fs1, nhalo, n)
-        call interpolate( fs1, i3, i4, di )
+        if (io%nodecell=='nod') then
+            call interpolate( fs1, i3, i4, di, 'linear')
+        else
+            call interpolate( fs1, i3, i4, di, 'nearest')
+        end if
         call scalar_swap_halo( fs1, nhalo, n)
     end if
     temp_i2 = i2

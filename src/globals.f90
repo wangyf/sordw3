@@ -13,7 +13,9 @@ real :: period, source1(3), source2(3), strike,dip,rake,m0, &
         svtol, rnucl, tmnucl, delts, tv, pleta, tpsubdt
 character(30) :: source, timefunction, eplasticity, plmodel, friction, pcdep, &
         ivols, tp_vw, tp_method
-
+! only apply to fieldio 
+character(10) :: nodelist(80)
+character(10) :: celllist(80)
 ! Miscellaneous parameters
 real, parameter :: pi = 3.14159265
 real :: &
