@@ -216,7 +216,9 @@ allocate(         &
     f2(j,k,l),    &
     f3(j,k,l),    &
     f5(j,k,l),    &
-    f6(j,k,l) )
+    f6(j,k,l),    &
+    f7(j,k,l),    &
+    f8(j,k,l) )
 
 if ( pcdep == 'yes' ) then
     if ( master ) write( 0, * ) 'Regularized Response to Tn Variation'

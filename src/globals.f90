@@ -134,6 +134,7 @@ real, allocatable, target, dimension(:,:,:) :: &
     sv0,            &
     f1, f2, f3,     &
     f4, f5, f6,     &
+    f7, f8,         &
     fun, dfun, delf    
 
 real, allocatable, target, dimension(:,:,:,:) :: &

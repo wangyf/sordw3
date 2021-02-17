@@ -129,7 +129,7 @@ case default
         else if (any(celllist==io%field)) then
             io%nodecell='cel'
         else
-            write(0,*) 'Unknown field for node/cell',io%field
+            write(0,*) 'Unknown field for node/cell ',io%field
             stop
         end if
     case default; ios = 1
@@ -228,8 +228,9 @@ nodelist(74)    = 'sum'
 nodelist(75)    = 'sl'
 nodelist(76)    = 'erf'
 nodelist(77)    = 'ere'
-nodelist(78)    = 'trup'
-nodelist(79)    = 'tarr'
+nodelist(78)    = 'eft'
+nodelist(79)    = 'trup'
+nodelist(80)    = 'tarr'
 
 
 celllist(1)     = 'c1'

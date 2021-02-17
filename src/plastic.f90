@@ -11,7 +11,7 @@ use m_globals
 use m_util
 use m_fieldio
 
-integer :: i
+integer :: i,i1(3)
 
 if (eplasticity /= 'plastic') return
 if (plmodel /= 'DP1') return
@@ -35,12 +35,26 @@ r3 = - s1 / 3.0 * sin( phi ) + mco * cos( phi )
 r3 = r3 * s2
 
 call fieldio( '<>', 'plcls', r3 ) !input or output the ratio between t_yield/t_bar (>1 elastic)
-if (it == 1 .and. any(r3(i1cell(1):i2cell(1), &
-                          i1cell(2):i2cell(2), &
-                          i1cell(3):i2cell(3)) < 1)) then
-    write( 0, * ) 'ERROR: Yield surface is reached at beginning'
-    stop
+! if (it == 1 .and. any(r3(i1cell(1):i2cell(1), &
+!                           i1cell(2):i2cell(2), &
+!                           i1cell(3):i2cell(3)) < 1)) then
+!     write( 0, * ) 'ERROR: Yield surface is reached at beginning'
+!     stop
+! end if
+
+if (it==1 .and. debug > 1 .and. minval( r3(i1cell(1):i2cell(1), &
+                                           i1cell(2):i2cell(2), &
+                                           i1cell(3):i2cell(3))) < 1) then
+    i1 = minloc(r3(i1cell(1):i2cell(1), &
+                               i1cell(2):i2cell(2), &
+                               i1cell(3):i2cell(3)))
+    write(0,*) 'ERROR: Yield surface is reached at', i1,' ip=', ip
 end if
+if (it==1 .and. minval( r3(i1cell(1):i2cell(1), &
+                           i1cell(2):i2cell(2), &
+                           i1cell(3):i2cell(3))) < 1) &
+    stop 'ERROR: Yield surface is reached at beginning'
+
 
 if ( tv > 1.e-6 ) then
    s2 = r3 + ( 1.0 - r3 ) * exp( - dt / tv )

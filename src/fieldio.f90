@@ -218,7 +218,6 @@ case( '=r', '+r', '=R', '+R' )
         io%ib = io%nb
         io%fh = frio_file_null
         if ( mpin /= 0 ) io%fh = file_null
-
     end if
     if ( io%ib == io%nb ) then
         n(4) = min( io%nb, (it2 - it) / dit + 1 )
@@ -229,12 +228,7 @@ case( '=r', '+r', '=R', '+R' )
             write( str, '(2a,i6.6)' ) trim( str ), '-', ipid
         call rio2( io%fh, io%buff(:,:n(4)), 'r', str, m, n, o, mpin, verb )
         io%ib = 0
-        if ( any( n < 1 ) ) then
-            deallocate( io%buff )
-            call pdelete
-            cycle loop
-        end if
-        if ( any( io%buff(:,:n(4)) /= io%buff(:,:n(4)) ) .or. &
+        if ( all(n > 0) .and. any( io%buff(:,:n(4)) /= io%buff(:,:n(4)) ) .or. &
             maxval( io%buff(:,:n(4)) ) > huge( val ) ) then
             write( 0, * ) 'ERROR: NaN/Inf in ', io%filename
             stop
@@ -242,15 +236,16 @@ case( '=r', '+r', '=R', '+R' )
     end if
     io%ib = io%ib + 1
     i = 0
-    do l = i1(3), i2(3), di(3)
-    do k = i1(2), i2(2), di(2)
-    do j = i1(1), i2(1), di(1)
-        i = i + 1
-        fs1(j,k,l) = io%buff(i,io%ib)
-    end do
-    end do
-    end do
-
+    if (all(n > 0)) then
+        do l = i1(3), i2(3), di(3)
+        do k = i1(2), i2(2), di(2)
+        do j = i1(1), i2(1), di(1)
+            i = i + 1
+            fs1(j,k,l) = io%buff(i,io%ib)
+        end do
+        end do
+        end do
+    end if
     if ( any( di > 1 ) ) then
         i3 = io%ii(1,1:3) - nnoff
         i4 = io%ii(2,1:3) - nnoff
@@ -267,15 +262,21 @@ case( '=r', '+r', '=R', '+R' )
         end if
 
         if ( any( di > nhalo .and. np3 > 1 ) ) stop 'di too large for nhalo'
-        call scalar_swap_halo( fs1, nhalo, n)
+        call scalar_swap_halo( fs1, nhalo, m)
         if (io%nodecell=='nod') then
             call interpolate( fs1, i3, i4, di, 'linear')
         else
             call interpolate( fs1, i3, i4, di, 'nearest')
         end if
-        call scalar_swap_halo( fs1, nhalo, n)
+        call scalar_swap_halo( fs1, nhalo, m)
 
     end if
+    if ( any( n < 1 ) ) then
+        deallocate( io%buff )
+        call pdelete
+        cycle loop
+    end if
+
     if ( io%mode(2:2) == 'R' ) then
         if ( m(1) == 1 ) then
             i2(1) = size( fs1, 1 )
@@ -296,18 +297,24 @@ case( '=r', '+r', '=R', '+R' )
             end do
         end if
     end if
+    i3 = i1
+    i4 = i2
+    if(any( di > 1 )) then
+        i3 = i1core
+        i4 = i2core
+    end if
     if ( io%mode(1:1) == '=' ) then
-        do l = i1(3), i2(3)
-        do k = i1(2), i2(2)
-        do j = i1(1), i2(1)
+        do l = i3(3), i4(3)
+        do k = i3(2), i4(2)
+        do j = i3(1), i4(1)
             f(j,k,l) = fs1(j,k,l)
         end do
         end do
         end do
     elseif ( io%mode(1:1) == '+' ) then
-        do l = i1(3), i2(3)
-        do k = i1(2), i2(2)
-        do j = i1(1), i2(1)
+        do l = i3(3), i4(3)
+        do k = i3(2), i4(2)
+        do j = i3(1), i4(1)
             f(j,k,l) = f(j,k,l) + fs1(j,k,l)
         end do
         end do
@@ -402,7 +409,7 @@ if ( i > 0 .and. debug > 3 .and. it <= 8 ) then
 end if
 
 ! Timer
-if (sync) call barrier
+!if (sync) call barrier
 iotimer = iotimer + timer( 2 )
 
 end subroutine
@@ -604,12 +611,7 @@ case( '=r', '+r', '=R', '+R' )
             write( str, '(2a,i6.6)' ) trim( str ), '-', ipid
         call rio2( io%fh, io%buff(:,:n(4)), 'r', str, m, n, o, mpin, verb )
         io%ib = 0
-        if ( any( n < 1 ) ) then
-            deallocate( io%buff )
-            call pdelete
-            cycle loop
-        end if
-        if ( any( io%buff(:,:n(4)) /= io%buff(:,:n(4)) ) .or. &
+        if ( all (n > 1) .and. any( io%buff(:,:n(4)) /= io%buff(:,:n(4)) ) .or. &
             maxval( io%buff(:,:n(4)) ) > huge( val ) ) then
             write( 0, * ) 'ERROR: NaN/Inf in ', io%filename
             stop
@@ -617,14 +619,16 @@ case( '=r', '+r', '=R', '+R' )
     end if
     io%ib = io%ib + 1
     i = 0
-    do l = i1(3), i2(3), di(3)
-    do k = i1(2), i2(2), di(2)
-    do j = i1(1), i2(1), di(1)
-        i = i + 1
-        fs1(j,k,l) = io%buff(i,io%ib)
-    end do
-    end do
-    end do
+    if (all ( n > 0)) then
+        do l = i1(3), i2(3), di(3)
+        do k = i1(2), i2(2), di(2)
+        do j = i1(1), i2(1), di(1)
+            i = i + 1
+            fs1(j,k,l) = io%buff(i,io%ib)
+        end do
+        end do
+        end do
+    end if
     if ( any( di > 1 ) ) then
         i3 = io%ii(1,1:3) - nnoff
         i4 = io%ii(2,1:3) - nnoff
@@ -641,13 +645,18 @@ case( '=r', '+r', '=R', '+R' )
         end if
 
         if ( any( di > nhalo .and. np3 > 1 ) ) stop 'di too large for nhalo'
-        call scalar_swap_halo( fs1, nhalo, n)
+        call scalar_swap_halo( fs1, nhalo, m)
         if (io%nodecell=='nod') then
             call interpolate( fs1, i3, i4, di, 'linear')
         else
             call interpolate( fs1, i3, i4, di, 'nearest')
         end if
-        call scalar_swap_halo( fs1, nhalo, n)
+        call scalar_swap_halo( fs1, nhalo, m)
+    end if
+    if ( any( n < 1 ) ) then
+        deallocate( io%buff )
+        call pdelete
+        cycle loop
     end if
     temp_i2 = i2
     if ( io%mode(2:2) == 'R' ) then
@@ -669,6 +678,12 @@ case( '=r', '+r', '=R', '+R' )
                 fs1(:,:,i) = fs1(:,:,1)
             end do
         end if
+    end if
+    i3 = i1
+    i4 = i2
+    if(any( di > 1 )) then
+        i3 = i1core
+        i4 = i2core
     end if
     if ( io%mode(1:1) == '=' ) then
         do l = i1(3), i2(3)
@@ -776,7 +791,7 @@ if ( i > 0 .and. debug > 3 .and. it <= 8 ) then
 end if
 
 ! Timer
-if (sync) call barrier
+!if (sync) call barrier
 iotimer = iotimer + timer( 2 )
 
 end subroutine

@@ -1,7 +1,7 @@
 ! Rupture boundary condition
 module m_rupture
 implicit none
-real :: lastvalue
+real :: lastvalue,lastvalue2
 contains
 
 ! Rupture initialization
@@ -27,6 +27,7 @@ if ( ifn /= 0 ) then
  
     t0 = 0.
     lastvalue = 0.0
+    lastvalue2= 0.0 
 end if 
 
 if ( ivols == 'yes' ) call inivolstress
@@ -39,6 +40,7 @@ t1 = 0.0
 t2 = 0.0
 t3 = 0.0
 f5 = 0.0
+f7 = 0.0
 
 if ( friction == 'slipweakening' ) then
     co = 0.0
@@ -256,6 +258,7 @@ psv   =  0.0
 trup  =  1e9
 tarr  =  0.0
 efric =  0.0
+efrac =  0.0
 
 ! Halos
 call scalar_swap_halo( co,    nhalo )
@@ -741,6 +744,20 @@ call set_halo( f2, 0.0, i1core, i2core )
 
 efric = efric + dt * (sum( f2 ) + lastvalue) * 0.5 !use triangle integral method
 lastvalue = sum( f2 )
+
+! pure fracture energy in SW
+if (friction == 'slipweakening') then
+    !(ts - td) * sv density
+    f2 = sum(t1 * t2, 4) + mud * tn * sqrt( sum( t2 * t2, 4))
+    f7 = f7 + (f2 + f8) * dt * 0.5
+    f8 = f2
+    call fieldio( '>', 'eft', f7 )
+    f2 = f2 * area
+    call set_halo( f2, 0.0, i1core, i2core )
+    
+    efrac = efrac + dt * (sum( f2 ) + lastvalue2) * 0.5 !use triangle integral method
+    lastvalue2 = sum( f2 )
+end if
 
 ! Strain energy
 t2 = uu(j3:j4,k3:k4,l3:l4,:) - uu(j1:j2,k1:k2,l1:l2,:)

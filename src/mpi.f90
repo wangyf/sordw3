@@ -256,7 +256,7 @@ end do
 end subroutine
 
 ! Vector swap halo
-subroutine vector_swap_halo( f, nh ,nin)
+subroutine vector_swap_halo( f, nh, nin)
 use mpi
 real, intent(inout) :: f(:,:,:,:)
 integer, intent(in) :: nh(3)
@@ -387,6 +387,7 @@ call rio2( fh, ff, mode, filename, mm, nn, oo, mpio, verb )
 if ( mode == 'r' ) f = ff(1,:)
 end subroutine
 
+
 ! Open file with MPIIO
 ! does not use mm(4) or nn(4)
 subroutine mpopen( fh, mode, filename, mm, nn, oo, verb )
@@ -411,9 +412,10 @@ end do
 if ( any( nn < 1 ) ) then
     call mpi_comm_split( comm0, mpi_undefined, 0, comm, e )
     fh = mpi_file_null
-    return
+else
+    call mpi_comm_split( comm0, 1, 0, comm, e )
 end if
-call mpi_comm_split( comm0, 1, 0, comm, e )
+if ( any( nn < 1 ) ) return
 if ( mode == 'r' ) then
     i = mpi_mode_rdonly
 elseif ( oo(n) == 0 ) then

@@ -172,11 +172,12 @@ if (method == 'linear') then
     end do
 ! for cell function
 else if (method == 'nearest') then
+    where(i2>1 .and. i2<n) i2=i2+1
     d = di(1)
     do i = 1, d - 1
         do l = i1(3), i2(3), di(3)
         do k = i1(2), i2(2), di(2)
-        do j = i1(1), i2(1), d
+        do j = i1(1), i2(1)-d, d
             f(j+i,k,l) = f(j,k,l)
         end do
         end do
@@ -185,7 +186,7 @@ else if (method == 'nearest') then
     d = di(2)
     do i = 1, d - 1
         do l = i1(3), i2(3), di(1)
-        do k = i1(2), i2(2), d
+        do k = i1(2), i2(2)-d, d
         do j = i1(1), i2(1)
             f(j,k+i,l) = f(j,k,l)
         end do
@@ -194,7 +195,7 @@ else if (method == 'nearest') then
     end do
     d = di(3)
     do i = 1, d - 1
-        do l = i1(3), i2(3), d
+        do l = i1(3), i2(3)-d, d
         do k = i1(2), i2(2)
         do j = i1(1), i2(1)
             f(j,k,l+i) = f(j,k,l)
