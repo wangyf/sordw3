@@ -509,9 +509,9 @@ if ( friction == 'rateandstate' .or. &
         end if
     
         !trail delta_v(n+1/2)
-        do i = 1, 3     
-            t1(:,:,:,i) = t3(:,:,:,i) * f3(:,:,:) * dt
-        end do
+        !do i = 1, 3     
+        !    t1(:,:,:,i) = t3(:,:,:,i) * f3(:,:,:) * dt
+        !end do
         !trial V (n+1/2)
         svtrl = ts * f3 * dt  
     
