@@ -55,6 +55,7 @@ end if
 
 if ( friction == 'rateandstate' .or. &
      friction == 'thermalpressurization') then
+    co = 0.0
     af = 0.0 
     bf = 0.0
     v0 = 0.0
@@ -64,6 +65,7 @@ if ( friction == 'rateandstate' .or. &
     vw = 0.0
     psi = 0.0
 
+    call fieldio2d( '<>', 'co',  co          )
     call fieldio2d( '<>', 'af',  af          )
     call fieldio2d( '<>', 'bf',  bf          )
     call fieldio2d( '<>', 'v0',  v0          )
@@ -470,7 +472,11 @@ if ( friction == 'rateandstate' .or. &
         !psi = af * log( 2.0 * v0 / svold * sinh( ts / (-tn) / af ) )
         !psi = af * sngl(dlog( 2.0 * v0 / svold * sinh( dble(ts / (-tn) / af )) ))
         if (friction == 'thermalpressurization') tneff = tn + porep
-        psi = af * log( 2.0 * v0 / svold * sinh( ts / (-tneff) / af ) )
+        
+        if any((ts-co)<0) then
+            stop "Initial stress lower than cohesion"
+        end
+        psi = af * log( 2.0 * v0 / svold * sinh( (ts - co)/ (-tneff) / af ) )
 
         f1 = ts
         sv0 = svold
@@ -579,7 +585,7 @@ if ( friction == 'rateandstate' .or. &
         
         do while ( abs(delf(j,k,l)) > tol .and. niter <= nmax ) 
     
-            fun(j,k,l) = svtrl(j,k,l) - f4(j,k,l) * f1(j,k,l) - v0(j,k,l) * & 
+            fun(j,k,l) = svtrl(j,k,l) - f4(j,k,l) * f1(j,k,l) - dt*f3(j,k,l)*co(j,k,l) - v0(j,k,l) * & 
                  ( exp((f1(j,k,l)-psi(j,k,l))/af(j,k,l)) - exp(-(f1(j,k,l)+psi(j,k,l))/af(j,k,l)) )
             dfun(j,k,l) = -f4(j,k,l) - ( exp((f1(j,k,l)-psi(j,k,l))/af(j,k,l)) + &
                  exp(-(f1(j,k,l)+psi(j,k,l))/af(j,k,l)) ) *V0(j,k,l) / af(j,k,l)
@@ -609,9 +615,9 @@ if ( friction == 'rateandstate' .or. &
     
         !normal rate and state friction
         if ( pcdep == 'yes' ) then 
-            f1 = -min( 0.0, tnpc ) * f1
+            f1 = -min( 0.0, tnpc ) * f1 + co
         else
-            f1 = -min( 0.0, tneff ) * f1
+            f1 = -min( 0.0, tneff ) * f1 + co
         end if
         
     
