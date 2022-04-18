@@ -21,6 +21,23 @@ def readbin(file,shape,inputdtype=None):
     fd.close()
     return matrix
 
+def readbinseg(file,shape,offset=0,count=-1,inputdtype=None):
+    if inputdtype == None:
+        inputdtype = np.dtype( 'f8' ).str #real*4
+    matrix = np.fromfile(fd, inputdtype,offset=offset,count=count).reshape(shape).astype(np.dtype( 'f8' ).str)
+    print('Read size check',file,matrix.shape)
+    fd.close()
+    return matrix
+
+def writebin(file,matrix,outdtype=None):
+    fd = open( file ,'wb')
+    if dtype==None: 
+        dtype=np.dtype( 'f8' ).str #'<f4'
+    print('Write size check',file,matrix.shape)
+    matrix.astype(outdtype).tofile( fd )
+    fd.close()
+    return
+
 def tsurf( path ):
     """
     Read GOCAD (http://www.gocad.org) trigulated surface "Tsurf" files.
