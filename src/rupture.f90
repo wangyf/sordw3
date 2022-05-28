@@ -1,7 +1,7 @@
 ! Rupture boundary condition
 module m_rupture
 implicit none
-real :: lastvalue,lastvalue2
+real :: lastvalue
 contains
 
 ! Rupture initialization
@@ -27,7 +27,6 @@ if ( ifn /= 0 ) then
  
     t0 = 0.
     lastvalue = 0.0
-    lastvalue2= 0.0 
 end if 
 
 if ( ivols == 'yes' ) call inivolstress
@@ -264,7 +263,7 @@ efrac =  0.0
 call scalar_swap_halo( co,    nhalo )
 call scalar_swap_halo( area,  nhalo )
 call scalar_swap_halo( rhypo, nhalo )
-call scalar_swap_halo( tneff,nhalo)
+call scalar_swap_halo( tneff, nhalo)
 call vector_swap_halo( nhat,  nhalo )
 call vector_swap_halo( t0,    nhalo )
 call vector_swap_halo( ts0,   nhalo )
@@ -508,10 +507,11 @@ if ( friction == 'rateandstate' .or. &
             tnold = tneff
         end if
     
-        !trail delta_v(n+1/2)
+        ! redundant parttrail delta_v(n+1/2)
         !do i = 1, 3     
         !    t1(:,:,:,i) = t3(:,:,:,i) * f3(:,:,:) * dt
         !end do
+        
         !trial V (n+1/2)
         svtrl = ts * f3 * dt  
     
@@ -752,15 +752,17 @@ if (friction == 'slipweakening') then
     f7 = f7 + (f2 + f8) * dt * 0.5
     f8 = f2
     call fieldio( '>', 'eft', f7 )
-    f2 = f2 * area
-    call set_halo( f2, 0.0, i1core, i2core )
-    
-    efrac = efrac + dt * (sum( f2 ) + lastvalue2) * 0.5 !use triangle integral method
-    lastvalue2 = sum( f2 )
 end if
 
-! Strain energy
+! fracture energy
 t2 = uu(j3:j4,k3:k4,l3:l4,:) - uu(j1:j2,k1:k2,l1:l2,:)
+f2 = sum(t2 * t1, 4)
+f2 = f2 * area
+call set_halo( f2, 0.0, i1core, i2core )
+efrac = efric - sum( f2 )
+
+! Strain energy
+! t2 = uu(j3:j4,k3:k4,l3:l4,:) - uu(j1:j2,k1:k2,l1:l2,:)
 f2 = sum( (t0 + tp + t1) * t2, 4 ) * 0.5
 call fieldio( '>', 'ere', f2 )
 f2 = f2 * area
